@@ -118,19 +118,21 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
         double  turn            = 0;        // Desired turning power/speed (-1 to +1)
 
-        // Declare our motors
-        // Make sure your ID's match your configuration
-        DcMotor Front_Left = hardwareMap.dcMotor.get("Front_Left");
-        DcMotor Back_Left = hardwareMap.dcMotor.get("Back_Left");
-        DcMotor Front_Right = hardwareMap.dcMotor.get("Front_Right");
-        DcMotor Back_Right = hardwareMap.dcMotor.get("Back_Right");
+        // Initialize the hardware variables. Note that the strings used here as parameters
+        // to 'get' must match the names assigned during the robot configuration.
+        // step (using the FTC Robot Controller app on the phone).
+        Front_Right  = hardwareMap.get(DcMotor.class, "Front_Right");
+        Front_Left = hardwareMap.get(DcMotor.class, "Front_Left");
+        Back_Left  = hardwareMap.get(DcMotor.class, "Back_Left");
+        Back_Right = hardwareMap.get(DcMotor.class, "Back_Right");
 
-        // Reverse the right side motors. This may be wrong for your setup.
-        // If your robot moves backwards when commanded to go forwards,
-        // reverse the left side instead.
-        // See the note about this earlier on this page.
-        Back_Left.setDirection(DcMotorSimple.Direction.REVERSE);
-        Front_Left.setDirection(DcMotorSimple.Direction.REVERSE);
+        // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
+        // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
+        // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
+        Front_Left.setDirection(DcMotor.Direction.REVERSE);
+        Back_Left.setDirection(DcMotor.Direction.REVERSE);
+        Front_Right.setDirection(DcMotor.Direction.FORWARD);
+        Back_Right.setDirection(DcMotor.Direction.FORWARD);
 
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -141,15 +143,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        if (isStopRequested()) return;
-
         // Initialize the Apriltag Detection process
         initAprilTag();
-
-        // Initialize the hardware variables. Note that the strings used here as parameters
-        // to 'get' must match the names assigned during the robot configuration.
-        // step (using the FTC Robot Controller app on the phone).
-
 
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
