@@ -83,32 +83,33 @@ import java.util.concurrent.TimeUnit;
 
 @TeleOp(name="Omni Drive To AprilTag Field Centric", group = "Concept")
 //@Disabled
-public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
-{
+public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 6; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
     //  Drive = Error * Gain    Make these values smaller for smoother control, or larger for a more aggressive response.
-    final double SPEED_GAIN  =  0.02  ;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
-    final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
-    final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+    final double SPEED_GAIN = 0.02;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+    final double STRAFE_GAIN = 0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
+    final double TURN_GAIN = 0.01;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
     final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
+    final double MAX_AUTO_STRAFE = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_TURN = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
 
-    private DcMotor Front_Right   = null;  //  Used to control the left front drive wheel
-    private DcMotor Front_Left  = null;  //  Used to control the right front drive wheel
-    private DcMotor Back_Left    = null;  //  Used to control the left back drive wheel
-    private DcMotor Back_Right   = null;  //  Used to control the right back drive wheel
+    private DcMotor Front_Right = null;  //  Used to control the left front drive wheel
+    private DcMotor Front_Left = null;  //  Used to control the right front drive wheel
+    private DcMotor Back_Left = null;  //  Used to control the left back drive wheel
+    private DcMotor Back_Right = null;  //  Used to control the right back drive wheel
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
-    static int DESIRED_TAG_ID = -1 ;// Choose the tag you want to approach or set to -1 for ANY tag
+    static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
+    int redTeam = 1;
+    int blueTeam = 1;
 
     @Override public void runOpMode()
     {
@@ -137,10 +138,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
         IMU imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
-                RevHubOrientationOnRobot.UsbFacingDirection.FORWARD));
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
+        imu.resetYaw();
 
         // Initialize the Apriltag Detection process
         initAprilTag();
@@ -148,22 +150,55 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
         if (USE_WEBCAM)
             setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
 
+
         // Wait for driver to press start
         telemetry.addData("Camera preview on/off", "3 dots, Camera Stream");
         telemetry.addData(">", "Touch Play to start OpMode");
         telemetry.update();
-        waitForStart();
+
+        //If x or b is pressed team will be set to the corresponding color
+
+        while (opModeInInit()) {
+
+            if (gamepad1.x) {
+                blueTeam = 1;
+                redTeam = 0;
+                telemetry.addData("Red ", "Team");
+                telemetry.update();
+            } else if (gamepad1.b) {
+                redTeam = 1;
+                blueTeam = 0;
+                telemetry.addData("Blue ", "Team");
+                telemetry.update();
+            } else {
+                telemetry.addData("Red: ", redTeam);
+                telemetry.addData("Blue: ", blueTeam);
+
+                telemetry.update();
+            }
+        }
+
+        // waitForStart();  commented out because it may no longer be needed.  delete at some point
 
         while (opModeIsActive())
         {
             targetFound = false;
             desiredTag  = null;
 
+
             //Right Bumper will go to second desired tag below. (Make sure to set desired tag to -1 above)
-            if (gamepad1.left_bumper){
-                DESIRED_TAG_ID = 585;
-            }else if (gamepad1.right_bumper){
-                DESIRED_TAG_ID = 583;
+            //
+            if (gamepad1.left_bumper && redTeam == 1) {
+                DESIRED_TAG_ID = 5;
+            }
+            else if (gamepad1.right_bumper && redTeam == 1) {
+                DESIRED_TAG_ID = 8;
+            }
+             if (gamepad1.left_bumper && blueTeam == 1){
+                DESIRED_TAG_ID = 2;
+            }
+             else if (gamepad1.right_bumper && blueTeam == 1){
+                DESIRED_TAG_ID = 9;
             }
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -186,7 +221,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
-            } else {
+            }
+            else {
                 telemetry.addData(">","Drive using joysticks to find valid target\n");
             }
 
@@ -265,6 +301,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
                 Front_Right.setPower(frontRightPower);
                 Back_Right.setPower(backRightPower);
             }
+            telemetry.update();
         }
     }
 
@@ -279,10 +316,10 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
      */
     public void moveRobot2AprilTag(double x, double y, double yaw) {
         // Calculate wheel powers.
-        double leftFrontPower    =  x -y -yaw;
-        double rightFrontPower   =  x +y +yaw;
-        double leftBackPower     =  x +y -yaw;
-        double rightBackPower    =  x -y +yaw;
+        double leftFrontPower    =  x - y -yaw;
+        double rightFrontPower   =  x + y +yaw;
+        double leftBackPower     =  x + y -yaw;
+        double rightBackPower    =  x - y +yaw;
 
         // Normalize wheel powers to be less than 1.0
         double max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
@@ -362,3 +399,4 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode
         }
     }
 }
+
