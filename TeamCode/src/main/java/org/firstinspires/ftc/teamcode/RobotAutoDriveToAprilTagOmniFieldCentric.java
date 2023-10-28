@@ -32,6 +32,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -102,6 +104,10 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private DcMotor Front_Left = null;  //  Used to control the right front drive wheel
     private DcMotor Back_Left = null;  //  Used to control the left back drive wheel
     private DcMotor Back_Right = null;  //  Used to control the right back drive wheel
+    private DcMotor Intake = null; // Used for the intake pulleys
+    private DcMotor Slide =null; // Slide motor
+    private Servo Wrist =null; // Wrist Servo
+    private Servo Bucket =null; //Bucket Servo
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
@@ -110,6 +116,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
     int redTeam = 1;
     int blueTeam = 1;
+    int intDirection = 1;  // Into Robot
+    int intakeOn = -1;     // Intake Off
+    double intakePwr = -1; // sets the pwr to things
 
     @Override public void runOpMode()
     {
@@ -125,6 +134,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Front_Left = hardwareMap.get(DcMotor.class, "Front_Left");
         Back_Left  = hardwareMap.get(DcMotor.class, "Back_Left");
         Back_Right = hardwareMap.get(DcMotor.class, "Back_Right");
+        Intake = hardwareMap.get(DcMotor.class, "Intake");
+        Slide = hardwareMap.get(DcMotor.class, "Slide");
+        Wrist = hardwareMap.get(Servo.class, "Wrist");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -133,6 +145,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Back_Left.setDirection(DcMotor.Direction.REVERSE);
         Front_Right.setDirection(DcMotor.Direction.FORWARD);
         Back_Right.setDirection(DcMotor.Direction.FORWARD);
+        Intake.setDirection(DcMotorSimple.Direction.FORWARD);
+        Slide.setDirection(DcMotorSimple.Direction.FORWARD);
 
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -185,20 +199,33 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             targetFound = false;
             desiredTag  = null;
 
-
+            if (gamepad1.x) {
+                intakeOn = intakeOn * -1;  // Switches between On and Off
+                intDirection = 1;   // Goes Into Robot
+            }
+            else if (gamepad1.b) {
+                intakeOn = intakeOn * -1; // Switches between On and Off
+                intDirection = -1;   // Goes Out of Robot
+            }
+            if (intakeOn == 1) {
+                Intake.setPower(intakePwr *intDirection);  // Sets the Intake to On
+            }
+            else {
+                Intake.setPower(intakePwr *0); // Turns the Intake off
+            }
             //Right Bumper will go to second desired tag below. (Make sure to set desired tag to -1 above)
             //
             if (gamepad1.left_bumper && redTeam == 1) {
                 DESIRED_TAG_ID = 5;
             }
             else if (gamepad1.right_bumper && redTeam == 1) {
-                DESIRED_TAG_ID = 8;
+                DESIRED_TAG_ID = 9;
             }
              if (gamepad1.left_bumper && blueTeam == 1){
                 DESIRED_TAG_ID = 2;
             }
              else if (gamepad1.right_bumper && blueTeam == 1){
-                DESIRED_TAG_ID = 9;
+                DESIRED_TAG_ID = 8;
             }
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
@@ -334,10 +361,10 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         }
 
         // Send powers to the wheels.
-        Front_Left.setPower(leftFrontPower);
-        Front_Right.setPower(rightFrontPower);
-        Back_Left.setPower(leftBackPower);
-        Back_Right.setPower(rightBackPower);
+        Front_Left.setPower(leftFrontPower*.75);
+        Front_Right.setPower(rightFrontPower*.75);
+        Back_Left.setPower(leftBackPower*.75);
+        Back_Right.setPower(rightBackPower*.75);
     }
 
     /**
