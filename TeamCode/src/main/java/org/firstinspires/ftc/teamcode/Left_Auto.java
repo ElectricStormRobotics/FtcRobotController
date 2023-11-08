@@ -27,19 +27,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.firstinspires.ftc.robotcontroller.external.samples;
+package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+import java.util.List;
 /*
  *  This OpMode illustrates the concept of driving an autonomous path based on Gyro (IMU) heading and encoder counts.
  *  The code is structured as a LinearOpMode
@@ -88,10 +97,30 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="13415 Java Auto", group="Robot")
+@Autonomous(name="Left Auto", group="Robot")
 //@Disabled
-public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
+public class Left_Auto extends LinearOpMode {
+    /* Vision Variables */
+    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    /**
+     * The variable to store our instance of the AprilTag processor.
+     */
+    private AprilTagProcessor aprilTag;
+    /**
+     * The variable to store our instance of the TensorFlow Object Detection processor.
+     */
+    private TfodProcessor tfod;
 
+    private static final String[] LABELS = {
+            "Blue_Bolt",
+            "Red_Bolt",
+    };
+
+    private boolean isPropDetected = false;
+    /**
+     * The variable to store our instance of the vision portal.
+     */
+    private VisionPortal myVisionPortal;
     /* Declare OpMode members. */
     private DcMotor         leftFrontDrive = null;
     private DcMotor         rightFrontDrive = null;
@@ -135,10 +164,11 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
     // Decrease these numbers if the heading does not settle on the correct value (eg: very agile robot with omni wheels)
     static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_GAIN           = 0.03;     // Larger is more responsive, but also less stable
-
+    static int TeamElementPosition = 1; //default to 1 = left 2 = center 3 = right
 
     @Override
     public void runOpMode() {
+        initDoubleVision();
 
         // Initialize the drive system variables.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "Front_Left");
@@ -159,8 +189,8 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
          *
          * To Do:  EDIT these two lines to match YOUR mounting configuration.
          */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.FORWARD;
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
@@ -179,8 +209,11 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Wait for the game to start (Display Gyro value while waiting)
         while (opModeInInit()) {
-            telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
+            myVisionPortal.setProcessorEnabled(tfod, true);
+            telemetryTfod();
             telemetry.update();
+            sleep(20);
+
         }
 
         // Set the encoders for closed loop speed control, and reset the heading.
@@ -195,13 +228,36 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         //          holdHeading() is used after turns to let the heading stabilize
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
-        driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
+        // if position == 2 pixel goes to center spike
+        if (TeamElementPosition == 2) {
+            driveStraight(DRIVE_SPEED, 28.0, 0.0);
+        }
+        else if (TeamElementPosition == 3) {
+            driveStraight(DRIVE_SPEED, 35.0, -40.0);
+            turnToHeading( TURN_SPEED, -40.0);
+            sleep(500);
+
+        }
+        else {
+
+            driveStraight(DRIVE_SPEED, 5.0,25.0);
+            driveStraight(DRIVE_SPEED, 20.0, 25.0);
+            turnToHeading( TURN_SPEED, 25.0);
+            sleep(500);
+
+        }
+
+        driveStraight( DRIVE_SPEED, -23, 0.0);
+        turnToHeading(TURN_SPEED, 0.0);
+        holdHeading( TURN_SPEED, 0.0, 0.5);
+
+
+        /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
 
         driveStraight(DRIVE_SPEED, 17.0, -45.0);  // Drive Forward 17" at -45 degrees (12"x and 12"y)
         turnToHeading( TURN_SPEED,  45.0);               // Turn  CCW  to  45 Degrees
-        holdHeading( TURN_SPEED,  45.0, 0.5);    // Hold  45 Deg heading for a 1/2 second
 
         driveStraight(DRIVE_SPEED, 17.0, 45.0);  // Drive Forward 17" at 45 degrees (-12"x and 12"y)
         turnToHeading( TURN_SPEED,   0.0);               // Turn  CW  to 0 Degrees
@@ -209,9 +265,23 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
 
         driveStraight(DRIVE_SPEED,-48.0, 0.0);    // Drive in Reverse 48" (should return to approx. staring position)
 
+        DiagonalRight(DRIVE_SPEED, 10.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, .5);
+
+        DiagonalRight(DRIVE_SPEED, -10.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, .5);
+/*
+        DiagonalLeft(DRIVE_SPEED, 10.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, 0.5);
+
+        DiagonalLeft(DRIVE_SPEED, -10.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, 0.5);*/
+
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(2000);  // Pause to display last telemetry message.
+
+
     }
 
     /*
@@ -401,7 +471,116 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
     }
+    public void DiagonalRight (double maxDriveSpeed,
+                              double distance,
+                              double heading) {
 
+        // Ensure that the OpMode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            int moveCounts = (int)(distance * COUNTS_PER_INCH);
+            //leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
+            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
+            leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            //rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+
+            // Set Target FIRST, then turn on RUN_TO_POSITION
+            //leftFrontDrive.setTargetPosition(leftTarget);
+            rightFrontDrive.setTargetPosition(rightTarget);
+            leftBackDrive.setTargetPosition(leftTarget);
+            //rightBackDrive.setTargetPosition(rightTarget);
+
+            //leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            //rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // Set the required driving speed  (must be positive for RUN_TO_POSITION)
+            // Start driving straight, and then enter the control loop
+            maxDriveSpeed = Math.abs(maxDriveSpeed);
+            moveRobot(maxDriveSpeed, 0);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (rightFrontDrive.isBusy())) {
+
+                // Determine required steering to keep on heading
+                turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
+
+                // if driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    turnSpeed *= -1.0;
+
+                // Apply the turning correction to the current driving speed.
+                moveRobot(driveSpeed, turnSpeed);
+
+                // Display drive status for the driver.
+                sendTelemetry(true);
+            }
+
+            // Stop all motion & Turn off RUN_TO_POSITION
+            moveRobot(0, 0);
+            //leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            //rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
+    public void DiagonalLeft (double maxDriveSpeed,
+                               double distance,
+                               double heading) {
+
+        // Ensure that the OpMode is still active
+        if (opModeIsActive()) {
+
+            // Determine new target position, and pass to motor controller
+            int moveCounts = (int)(distance * COUNTS_PER_INCH);
+            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
+            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
+            leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+
+            // Set Target FIRST, then turn on RUN_TO_POSITION
+            leftFrontDrive.setTargetPosition(leftTarget);
+            rightFrontDrive.setTargetPosition(rightTarget);
+            leftBackDrive.setTargetPosition(leftTarget);
+            rightBackDrive.setTargetPosition(rightTarget);
+
+            leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            leftBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            rightBackDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            // Set the required driving speed  (must be positive for RUN_TO_POSITION)
+            // Start driving straight, and then enter the control loop
+            maxDriveSpeed = Math.abs(maxDriveSpeed);
+            moveRobot(maxDriveSpeed, 0);
+
+            // keep looping while we are still active, and BOTH motors are running.
+            while (opModeIsActive() &&
+                    (leftFrontDrive.isBusy())) {
+
+                // Determine required steering to keep on heading
+                turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
+
+                // if driving in reverse, the motor correction also needs to be reversed
+                if (distance < 0)
+                    turnSpeed *= -1.0;
+
+                // Apply the turning correction to the current driving speed.
+                moveRobot(driveSpeed, turnSpeed);
+
+                // Display drive status for the driver.
+                sendTelemetry(true);
+            }
+
+            // Stop all motion & Turn off RUN_TO_POSITION
+            moveRobot(0, 0);
+            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+    }
     /**
      *  Spin on the central axis to point in a new direction.
      *  <p>
@@ -527,12 +706,133 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         leftBackDrive.setPower(leftSpeed);
         rightBackDrive.setPower(rightSpeed);
     }
+    public void moveRobot4wheel(double drive, double turn) {
+        driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
+        turnSpeed  = turn;      // save this value as a class member so it can be used by telemetry.
 
+        double leftFrontSpeed = drive - turn;
+        double rightFrontSpeed = drive + turn;
+        double leftBackSpeed = drive - turn;
+        double rightBackSpeed = drive + turn;
+
+        // Scale speeds down if either one exceeds +/- 1.0;
+        double max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+        if (max > 1.0)
+        {
+            leftSpeed /= max;
+            rightSpeed /= max;
+        }
+
+        leftFrontDrive.setPower(leftSpeed);
+        rightFrontDrive.setPower(rightSpeed);
+        leftBackDrive.setPower(leftSpeed);
+        rightBackDrive.setPower(rightSpeed);
+    }
     /**
      *  Display the various control parameters while driving
      *
      * @param straight  Set to true if we are driving straight, and the encoder positions should be included in the telemetry.
      */
+    /**
+     * Initialize AprilTag and TFOD.
+     */
+    private void initDoubleVision() {
+        // -----------------------------------------------------------------------------------------
+        // AprilTag Configuration
+        // -----------------------------------------------------------------------------------------
+
+        aprilTag = new AprilTagProcessor.Builder()
+                .build();
+
+        // -----------------------------------------------------------------------------------------
+        // TFOD Configuration
+        // -----------------------------------------------------------------------------------------
+
+        tfod = new TfodProcessor.Builder()
+                // Use setModelAssetName() if the TF Model is built in as an asset.
+                // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
+                .setModelAssetName("Prop_Model.tflite")
+                //.setModelFileName("Prop_Model")
+
+                .setModelLabels(LABELS)
+                /*.setIsModelTensorFlow2(true)
+                .setIsModelQuantized(true)
+                .setModelInputSize(300)
+                .setModelAspectRatio(16.0 / 9.0)
+                 */
+                .build();
+
+        // -----------------------------------------------------------------------------------------
+        // Camera Configuration
+        // -----------------------------------------------------------------------------------------
+
+        if (USE_WEBCAM) {
+            myVisionPortal = new VisionPortal.Builder()
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .addProcessors(tfod, aprilTag)
+                    .build();
+        } else {
+            myVisionPortal = new VisionPortal.Builder()
+                    .setCamera(BuiltinCameraDirection.BACK)
+                    .addProcessors(tfod, aprilTag)
+                    .build();
+        }
+    }   // end initDoubleVision()
+
+    /**
+     * Add telemetry about AprilTag detections.
+     */
+    private void telemetryAprilTag() {
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+            }
+        }   // end for() loop
+
+    }   // end method telemetryAprilTag()
+    private void telemetryTfod() {
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+        telemetry.addData("# Objects Detected", currentRecognitions.size());
+
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            telemetry.addData("", " ");
+            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+            telemetry.addData("- Position", "%.0f / %.0f", x, y);
+            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+            telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
+            if (recognition.getLabel().equals("Blue_Bolt") || recognition.getLabel().equals("Red_Bolt")) {
+                isPropDetected = true;
+                telemetry.addData("Object Detected", "Bolt Prop");
+                if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
+                    TeamElementPosition = 2;
+                    telemetry.addData("Spike Position", "Spike 2");
+                } else {
+                    TeamElementPosition = 1;
+                    telemetry.addData("Spike Position", "Spike 1");
+                }
+            }
+
+
+        }   // end method telemetryTfod()
+        if (currentRecognitions.size() == 0) {
+            TeamElementPosition = 3;
+            telemetry.addData("Spike Position", "Spike 3");
+        }   // end for() loop
+    }
     private void sendTelemetry(boolean straight) {
 
         if (straight) {

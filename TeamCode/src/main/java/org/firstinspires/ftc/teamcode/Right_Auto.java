@@ -31,7 +31,6 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
@@ -49,7 +48,6 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
-import java.util.Collections;
 import java.util.List;
 /*
  *  This OpMode illustrates the concept of driving an autonomous path based on Gyro (IMU) heading and encoder counts.
@@ -99,9 +97,9 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="13415 Java Auto", group="Robot")
+@Autonomous(name="Right Auto", group="Robot")
 //@Disabled
-public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
+public class Right_Auto extends LinearOpMode {
     /* Vision Variables */
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     /**
@@ -232,24 +230,26 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
 
         // if position == 2 pixel goes to center spike
         if (TeamElementPosition == 2) {
-            driveStraight(DRIVE_SPEED, 29.0, 0.0);
+            driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }
         else if (TeamElementPosition == 3) {
-            driveStraight(DRIVE_SPEED, 8.0, 0.0);
+            driveStraight(DRIVE_SPEED, 5.0, 0.0);
+            driveStraight(DRIVE_SPEED, 20, -25.0);
             turnToHeading( TURN_SPEED, -25.0);
-            holdHeading ( TURN_SPEED, -25.0, 0.5);
-            driveStraight(DRIVE_SPEED, 21, -25.0);
+            sleep(500);
+
         }
         else {
-            driveStraight(DRIVE_SPEED, 8.0, 0.0);
-            turnToHeading( TURN_SPEED, 25.0);
-            holdHeading ( TURN_SPEED, 25.0, 0.5);
-            driveStraight(DRIVE_SPEED, 21, -25.0);
+
+            driveStraight(DRIVE_SPEED, 35.0,40.0);
+            turnToHeading( TURN_SPEED, 40.0);
+            sleep(500);
+
         }
 
-        driveStraight( DRIVE_SPEED, -21, 0.0);
-        turnToHeading(TURN_SPEED, -90.0);
-        holdHeading( TURN_SPEED, -90.0, 0.5);
+        driveStraight( DRIVE_SPEED, -23, 0.0);
+        turnToHeading(TURN_SPEED, 0.0);
+        holdHeading( TURN_SPEED, 0.0, 0.5);
 
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
@@ -824,13 +824,14 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
                     TeamElementPosition = 2;
                     telemetry.addData("Spike Position", "Spike 2");
                 }
-            } else {
-                isPropDetected = false;
-                TeamElementPosition = 1;
-                telemetry.addData("Spike Position", "Spike 1");
-            }   // end for() loop
+            }
+
 
         }   // end method telemetryTfod()
+        if (currentRecognitions.size() == 0) {
+            TeamElementPosition = 1;
+            telemetry.addData("Spike Position", "Spike 1");
+        }   // end for() loop
     }
     private void sendTelemetry(boolean straight) {
 
