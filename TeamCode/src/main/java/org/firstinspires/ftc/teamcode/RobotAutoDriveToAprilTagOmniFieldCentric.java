@@ -87,7 +87,7 @@ import java.util.concurrent.TimeUnit;
 //@Disabled
 public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 6; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 1; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -96,8 +96,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     final double STRAFE_GAIN = 0.015;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
     final double TURN_GAIN = 0.01;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
-    final double MAX_AUTO_STRAFE = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_SPEED = 0.75;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_STRAFE = 0.6;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
 
     private DcMotor Front_Right = null;  //  Used to control the left front drive wheel
@@ -118,7 +118,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int blueTeam = 1;
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
-    double intakePwr = -1; // sets the pwr to things
+    double intakePwr = -0.8; // sets the pwr to things
 
     @Override public void runOpMode()
     {
@@ -137,6 +137,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Intake = hardwareMap.get(DcMotor.class, "Intake");
         Slide = hardwareMap.get(DcMotor.class, "Slide");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
+        Bucket = hardwareMap.get(Servo.class, "Bucket");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -146,7 +147,12 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Front_Right.setDirection(DcMotor.Direction.FORWARD);
         Back_Right.setDirection(DcMotor.Direction.FORWARD);
         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
-        Slide.setDirection(DcMotorSimple.Direction.FORWARD);
+        Slide.setDirection(DcMotorSimple.Direction.REVERSE);
+        Wrist.setDirection(Servo.Direction.FORWARD);
+        Bucket.setDirection(Servo.Direction.FORWARD);
+
+        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -174,6 +180,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeInInit()) {
 
+            Bucket.setPosition(0.0);
+            Wrist.setPosition(0.0);
+
             if (gamepad1.x) {
                 blueTeam = 1;
                 redTeam = 0;
@@ -200,11 +209,14 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             desiredTag  = null;
 
             if (gamepad1.x) {
-                intakeOn = intakeOn * -1;  // Switches between On and Off
+                intakeOn = 1; // turns intake on
                 intDirection = 1;   // Goes Into Robot
             }
+            if (gamepad1.a) {
+                intakeOn = -1; // intake off
+            }
             else if (gamepad1.b) {
-                intakeOn = intakeOn * -1; // Switches between On and Off
+                intakeOn = 1; // turns intake on
                 intDirection = -1;   // Goes Out of Robot
             }
             if (intakeOn == 1) {
@@ -227,6 +239,23 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
              else if (gamepad1.right_bumper && blueTeam == 1){
                 DESIRED_TAG_ID = 8;
             }
+             if (gamepad2.y && Wrist.getPosition()>.1 && Slide.getCurrentPosition() <= -200) {
+                 Wrist.setPosition(0);
+             }
+             else if (gamepad2.y && Wrist.getPosition()<.1 && Slide.getCurrentPosition() <= -200) {
+                Wrist.setPosition(.8);
+            }
+             else if (gamepad2.right_bumper && Bucket.getPosition() > 0.1 && Slide.getCurrentPosition() <= -200) {
+                 Bucket.setPosition(0.0);
+                 Wrist.setPosition(0);
+             }
+             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.1 && Wrist.getPosition() > .5 && Slide.getCurrentPosition() <= -200) {
+                 Bucket.setPosition(.6);
+
+             }
+
+
+
             // Step through the list of detected tags and look for a matching tag
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             for (AprilTagDetection detection : currentDetections) {
@@ -248,9 +277,18 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
+                telemetry.addData("Slide Position", Slide.getCurrentPosition());
+                telemetry.addData("Wrist Position", Wrist.getPosition());
+                telemetry.addData("Bucket position", Bucket.getPosition());
+                telemetry.update();
+
             }
             else {
                 telemetry.addData(">","Drive using joysticks to find valid target\n");
+                telemetry.addData("Wrist Position", Wrist.getPosition());
+                telemetry.addData("Slide Position", Slide.getCurrentPosition());
+                telemetry.addData("Bucket position", Bucket.getPosition());
+                telemetry.update();
             }
 
             // If Left Bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
@@ -327,6 +365,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 Back_Left.setPower(backLeftPower);
                 Front_Right.setPower(frontRightPower);
                 Back_Right.setPower(backRightPower);
+                Slide.setPower(gamepad2.left_stick_y);
             }
             telemetry.update();
         }

@@ -37,9 +37,20 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
+import java.util.Collections;
+import java.util.List;
 /*
  *  This OpMode illustrates the concept of driving an autonomous path based on Gyro (IMU) heading and encoder counts.
  *  The code is structured as a LinearOpMode
@@ -91,7 +102,27 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 @Autonomous(name="13415 Java Auto", group="Robot")
 //@Disabled
 public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
+    /* Vision Variables */
+    private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    /**
+     * The variable to store our instance of the AprilTag processor.
+     */
+    private AprilTagProcessor aprilTag;
+    /**
+     * The variable to store our instance of the TensorFlow Object Detection processor.
+     */
+    private TfodProcessor tfod;
 
+    private static final String[] LABELS = {
+            "Blue_Bolt",
+            "Red_Bolt",
+    };
+
+    private boolean isPropDetected = false;
+    /**
+     * The variable to store our instance of the vision portal.
+     */
+    private VisionPortal myVisionPortal;
     /* Declare OpMode members. */
     private DcMotor         leftFrontDrive = null;
     private DcMotor         rightFrontDrive = null;
@@ -135,10 +166,11 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
     // Decrease these numbers if the heading does not settle on the correct value (eg: very agile robot with omni wheels)
     static final double     P_TURN_GAIN            = 0.02;     // Larger is more responsive, but also less stable
     static final double     P_DRIVE_GAIN           = 0.03;     // Larger is more responsive, but also less stable
-
+    static int TeamElementPosition = 1; //default to 1 = left 2 = center 3 = right
 
     @Override
     public void runOpMode() {
+        initDoubleVision();
 
         // Initialize the drive system variables.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "Front_Left");
@@ -179,8 +211,11 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         // Wait for the game to start (Display Gyro value while waiting)
         while (opModeInInit()) {
-            telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
+            myVisionPortal.setProcessorEnabled(tfod, true);
+            telemetryTfod();
             telemetry.update();
+            sleep(20);
+
         }
 
         // Set the encoders for closed loop speed control, and reset the heading.
@@ -195,8 +230,29 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         //          holdHeading() is used after turns to let the heading stabilize
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
-        /*
-        driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
+        // if position == 2 pixel goes to center spike
+        if (TeamElementPosition == 2) {
+            driveStraight(DRIVE_SPEED, 29.0, 0.0);
+        }
+        else if (TeamElementPosition == 3) {
+            driveStraight(DRIVE_SPEED, 8.0, 0.0);
+            turnToHeading( TURN_SPEED, -25.0);
+            holdHeading ( TURN_SPEED, -25.0, 0.5);
+            driveStraight(DRIVE_SPEED, 21, -25.0);
+        }
+        else {
+            driveStraight(DRIVE_SPEED, 8.0, 0.0);
+            turnToHeading( TURN_SPEED, 25.0);
+            holdHeading ( TURN_SPEED, 25.0, 0.5);
+            driveStraight(DRIVE_SPEED, 21, -25.0);
+        }
+
+        driveStraight( DRIVE_SPEED, -21, 0.0);
+        turnToHeading(TURN_SPEED, -90.0);
+        holdHeading( TURN_SPEED, -90.0, 0.5);
+
+
+        /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
 
@@ -208,7 +264,7 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         holdHeading( TURN_SPEED,   0.0, 1.0);    // Hold  0 Deg heading for 1 second
 
         driveStraight(DRIVE_SPEED,-48.0, 0.0);    // Drive in Reverse 48" (should return to approx. staring position)
-        */
+
         DiagonalRight(DRIVE_SPEED, 10.0, 0.0);
         holdHeading(TURN_SPEED, 0.0, .5);
 
@@ -219,13 +275,13 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
         holdHeading(TURN_SPEED, 0.0, 0.5);
 
         DiagonalLeft(DRIVE_SPEED, -10.0, 0.0);
-        holdHeading(TURN_SPEED, 0.0, 0.5);
+        holdHeading(TURN_SPEED, 0.0, 0.5);*/
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
         sleep(2000);  // Pause to display last telemetry message.
 
- */
+
     }
 
     /*
@@ -677,6 +733,105 @@ public class RobotAutoDriveByGyro_Linear extends LinearOpMode {
      *
      * @param straight  Set to true if we are driving straight, and the encoder positions should be included in the telemetry.
      */
+    /**
+     * Initialize AprilTag and TFOD.
+     */
+    private void initDoubleVision() {
+        // -----------------------------------------------------------------------------------------
+        // AprilTag Configuration
+        // -----------------------------------------------------------------------------------------
+
+        aprilTag = new AprilTagProcessor.Builder()
+                .build();
+
+        // -----------------------------------------------------------------------------------------
+        // TFOD Configuration
+        // -----------------------------------------------------------------------------------------
+
+        tfod = new TfodProcessor.Builder()
+                // Use setModelAssetName() if the TF Model is built in as an asset.
+                // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
+                .setModelAssetName("Prop_Model.tflite")
+                //.setModelFileName("Prop_Model")
+
+                .setModelLabels(LABELS)
+                /*.setIsModelTensorFlow2(true)
+                .setIsModelQuantized(true)
+                .setModelInputSize(300)
+                .setModelAspectRatio(16.0 / 9.0)
+                 */
+                .build();
+
+        // -----------------------------------------------------------------------------------------
+        // Camera Configuration
+        // -----------------------------------------------------------------------------------------
+
+        if (USE_WEBCAM) {
+            myVisionPortal = new VisionPortal.Builder()
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .addProcessors(tfod, aprilTag)
+                    .build();
+        } else {
+            myVisionPortal = new VisionPortal.Builder()
+                    .setCamera(BuiltinCameraDirection.BACK)
+                    .addProcessors(tfod, aprilTag)
+                    .build();
+        }
+    }   // end initDoubleVision()
+
+    /**
+     * Add telemetry about AprilTag detections.
+     */
+    private void telemetryAprilTag() {
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        telemetry.addData("# AprilTags Detected", currentDetections.size());
+
+        // Step through the list of detections and display info for each one.
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.metadata != null) {
+                telemetry.addLine(String.format("\n==== (ID %d) %s", detection.id, detection.metadata.name));
+                telemetry.addLine(String.format("XYZ %6.1f %6.1f %6.1f  (inch)", detection.ftcPose.x, detection.ftcPose.y, detection.ftcPose.z));
+                telemetry.addLine(String.format("PRY %6.1f %6.1f %6.1f  (deg)", detection.ftcPose.pitch, detection.ftcPose.roll, detection.ftcPose.yaw));
+                telemetry.addLine(String.format("RBE %6.1f %6.1f %6.1f  (inch, deg, deg)", detection.ftcPose.range, detection.ftcPose.bearing, detection.ftcPose.elevation));
+            } else {
+                telemetry.addLine(String.format("\n==== (ID %d) Unknown", detection.id));
+                telemetry.addLine(String.format("Center %6.0f %6.0f   (pixels)", detection.center.x, detection.center.y));
+            }
+        }   // end for() loop
+
+    }   // end method telemetryAprilTag()
+    private void telemetryTfod() {
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+        telemetry.addData("# Objects Detected", currentRecognitions.size());
+
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            telemetry.addData("", " ");
+            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+            telemetry.addData("- Position", "%.0f / %.0f", x, y);
+            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+            telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
+            if (recognition.getLabel().equals("Blue_Bolt") || recognition.getLabel().equals("Red_Bolt")) {
+                isPropDetected = true;
+                telemetry.addData("Object Detected", "Bolt Prop");
+                if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
+                    TeamElementPosition = 3;
+                    telemetry.addData("Spike Position", "Spike 3");
+                } else {
+                    TeamElementPosition = 2;
+                    telemetry.addData("Spike Position", "Spike 2");
+                }
+            } else {
+                isPropDetected = false;
+                TeamElementPosition = 1;
+                telemetry.addData("Spike Position", "Spike 1");
+            }   // end for() loop
+
+        }   // end method telemetryTfod()
+    }
     private void sendTelemetry(boolean straight) {
 
         if (straight) {
