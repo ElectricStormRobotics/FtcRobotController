@@ -97,9 +97,9 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Left Auto", group="Robot")
+@Autonomous(name="Blue Auto Backstage", group="Robot", preselectTeleOp = "RobotAutoDriveToAprilTagOmniFieldCentric")
 //@Disabled
-public class Left_Auto extends LinearOpMode {
+public class LeftAutoBackstage extends LinearOpMode {
     /* Vision Variables */
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     /**
@@ -233,7 +233,7 @@ public class Left_Auto extends LinearOpMode {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }
         else if (TeamElementPosition == 3) {
-            driveStraight(DRIVE_SPEED, 35.0, -40.0);
+            driveStraight(DRIVE_SPEED, 33.0, -40.0);
             turnToHeading( TURN_SPEED, -40.0);
             sleep(500);
 
@@ -247,10 +247,25 @@ public class Left_Auto extends LinearOpMode {
 
         }
 
-        driveStraight( DRIVE_SPEED, -23, 0.0);
-        turnToHeading(TURN_SPEED, 0.0);
-        holdHeading( TURN_SPEED, 0.0, 0.5);
+        if (TeamElementPosition == 2) {
+            driveStraight(DRIVE_SPEED, -23.0, 0.0);
+        }
+        else if (TeamElementPosition == 3) {
+            driveStraight(DRIVE_SPEED, -28.0, 0.0);
+            turnToHeading( TURN_SPEED, 0.0);
+            sleep(500);
 
+        }
+        else {
+
+            driveStraight(DRIVE_SPEED, -20.0, 0.0);
+            turnToHeading( TURN_SPEED, 0.0);
+            sleep(500);
+
+        }
+
+        turnToHeading(TURN_SPEED, 90.0);
+        driveStraight(DRIVE_SPEED, 32.0, 90.0);
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees

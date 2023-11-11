@@ -97,9 +97,9 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Right Auto", group="Robot")
+@Autonomous(name="Blue Auto Not Backstage", group="Robot", preselectTeleOp = "RobotAutoDriveToAprilTagOmniFieldCentric")
 //@Disabled
-public class Right_Auto extends LinearOpMode {
+public class RightAutoNotBackStage extends LinearOpMode {
     /* Vision Variables */
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     /**

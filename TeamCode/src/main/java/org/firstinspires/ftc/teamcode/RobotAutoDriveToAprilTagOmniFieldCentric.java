@@ -106,6 +106,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private DcMotor Back_Right = null;  //  Used to control the right back drive wheel
     private DcMotor Intake = null; // Used for the intake pulleys
     private DcMotor Slide =null; // Slide motor
+    private DcMotor Winch = null; // Raises the Robot
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
@@ -136,6 +137,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Back_Right = hardwareMap.get(DcMotor.class, "Back_Right");
         Intake = hardwareMap.get(DcMotor.class, "Intake");
         Slide = hardwareMap.get(DcMotor.class, "Slide");
+        Winch = hardwareMap.get(DcMotor.class, "Winch");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
 
@@ -148,11 +150,13 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Back_Right.setDirection(DcMotor.Direction.FORWARD);
         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
         Slide.setDirection(DcMotorSimple.Direction.REVERSE);
+        Winch.setDirection(DcMotorSimple.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.FORWARD);
-
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
