@@ -33,6 +33,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
@@ -109,6 +110,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private DcMotor Winch = null; // Raises the Robot
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
+    private Servo Hanger = null; //Hanger Servo
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
@@ -121,12 +123,16 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int intakeOn = -1;     // Intake Off
     double intakePwr = -0.8; // sets the pwr to things
 
+
+
     @Override public void runOpMode()
     {
         boolean targetFound     = false;    // Set to true when an AprilTag target is detected
         double  drive           = 0;        // Desired forward power/speed (-1 to +1)
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
         double  turn            = 0;        // Desired turning power/speed (-1 to +1)
+
+
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must match the names assigned during the robot configuration.
@@ -140,6 +146,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Winch = hardwareMap.get(DcMotor.class, "Winch");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
+        Hanger = hardwareMap.get(Servo.class,"Hanger");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -153,6 +160,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Winch.setDirection(DcMotorSimple.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.FORWARD);
+        Hanger.setDirection(Servo.Direction.FORWARD);
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -186,20 +194,24 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
             Bucket.setPosition(0.0);
             Wrist.setPosition(0.0);
+            Hanger.setPosition(0.0);
 
             if (gamepad1.x) {
                 blueTeam = 1;
                 redTeam = 0;
                 telemetry.addData("Red ", "Team");
+                telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
             } else if (gamepad1.b) {
                 redTeam = 1;
                 blueTeam = 0;
                 telemetry.addData("Blue ", "Team");
+                telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
             } else {
                 telemetry.addData("Red: ", redTeam);
                 telemetry.addData("Blue: ", blueTeam);
+                telemetry.addData("Servo Position", Hanger.getPosition());
 
                 telemetry.update();
             }
@@ -243,9 +255,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
              else if (gamepad1.right_bumper && blueTeam == 1){
                 DESIRED_TAG_ID = 8;
             }
-             if (gamepad2.y && Wrist.getPosition()>.1 && Slide.getCurrentPosition() <= -200) {
-                 Wrist.setPosition(0);
-             }
+
              else if (gamepad2.y && Wrist.getPosition()<.1 && Slide.getCurrentPosition() <= -200) {
                 Wrist.setPosition(.8);
             }
@@ -257,6 +267,29 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  Bucket.setPosition(.6);
 
              }
+             else if (gamepad2.a) {
+                 Hanger.setPosition(0);
+             }
+             if (gamepad2.x) {
+                 Hanger.setPosition(0.3);
+             }
+             if (gamepad2.dpad_down) {
+                 Winch.setPower(1);
+                 sleep(500);
+             }
+            if (gamepad2.dpad_up) {
+                Winch.setPower(-1);
+                sleep(500);
+            }
+             else {
+                 Winch.setPower(0.0);
+             }
+
+
+
+
+             telemetry.addData("Servo Position", Hanger.getPosition());
+             telemetry.update();
 
 
 
@@ -284,6 +317,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Slide Position", Slide.getCurrentPosition());
                 telemetry.addData("Wrist Position", Wrist.getPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
+                telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
 
             }
@@ -292,6 +326,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Wrist Position", Wrist.getPosition());
                 telemetry.addData("Slide Position", Slide.getCurrentPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
+                telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
             }
 

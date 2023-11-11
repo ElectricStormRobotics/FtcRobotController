@@ -814,7 +814,7 @@ public class RightAutoNotBackStage extends LinearOpMode {
             telemetry.addData("- Position", "%.0f / %.0f", x, y);
             telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
             telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
-            if (recognition.getLabel().equals("Blue_Bolt") || recognition.getLabel().equals("Red_Bolt")) {
+            if (recognition.getLabel().equals("Blue_Bolt")) {
                 isPropDetected = true;
                 telemetry.addData("Object Detected", "Bolt Prop");
                 if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
