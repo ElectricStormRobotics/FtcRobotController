@@ -97,7 +97,7 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Red Auto Backstage", group="Robot", preselectTeleOp = "RobotAutoDriveToAprilTagOmniFieldCentric")
+@Autonomous(name="Red Auto Backstage", group="Robot", preselectTeleOp = "Omni Drive To AprilTag Field Centric")
 //@Disabled
 public class RightAutoBackstage extends LinearOpMode {
     /* Vision Variables */
