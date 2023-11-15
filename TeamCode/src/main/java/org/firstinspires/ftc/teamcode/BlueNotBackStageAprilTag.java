@@ -311,6 +311,8 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         StrafeRight(DRIVE_SPEED, 20, 0.0);
         holdHeading(TURN_SPEED, 0.0, 0.5);
 
+
+
         waittimer(1);
 
         driveStraight(DRIVE_SPEED, 43.0, 0.0);
@@ -325,19 +327,26 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
 
         if (targetFound) {
+
             turnToHeading(TURN_SPEED, 45.0);
             // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
-            double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-            double  headingError    = desiredTag.ftcPose.bearing;
-            double  yawError        = desiredTag.ftcPose.yaw;
+            double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+            double headingError = desiredTag.ftcPose.bearing;
+            double yawError = desiredTag.ftcPose.yaw;
+            while (rangeError <= 0.5) {
 
-            // Use the speed and turn "gains" to calculate how we want the robot to move.
-            drive  = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-            turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
-            strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+                // Use the speed and turn "gains" to calculate how we want the robot to move.
+                drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+                turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
 
-            telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
-            moveRobot2AprilTag(drive, strafe, turn);
+                telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                moveRobot2AprilTag(drive, strafe, turn);
+                rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+                headingError = desiredTag.ftcPose.bearing;
+                yawError = desiredTag.ftcPose.yaw;
+            }
+            driveStraight(DRIVE_SPEED,0.0, 0.0);
         }
 
      /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
@@ -450,10 +459,11 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
             // Stop all motion & Turn off RUN_TO_POSITION
             moveRobot(0, 0);
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         }
     }
 
@@ -506,10 +516,10 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
             // Stop all motion & Turn off RUN_TO_POSITION
             moveRobot(0, 0);
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
     }
 
@@ -549,8 +559,8 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
             leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
             rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+            //leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            //rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
             leftFrontDrive.setTargetPosition(leftTarget);
