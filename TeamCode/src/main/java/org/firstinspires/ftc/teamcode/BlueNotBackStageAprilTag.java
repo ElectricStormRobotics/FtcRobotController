@@ -39,9 +39,11 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -49,6 +51,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import org.firstinspires.ftc.vision.tfod.TfodProcessor;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 /*
  *  This OpMode illustrates the concept of driving an autonomous path based on Gyro (IMU) heading and encoder counts.
  *  The code is structured as a LinearOpMode
@@ -97,11 +100,16 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="Blue Auto Not Backstage", group="Robot", preselectTeleOp = "Omni Drive To AprilTag Field Centric")
+@Autonomous(name="BlueAuton NBS Yellow Pix", group="Robot", preselectTeleOp = "Omni Drive To AprilTag Field Centric")
 //@Disabled
-public class RightAutoNotBackStage extends LinearOpMode {
+public class BlueNotBackStageAprilTag extends LinearOpMode {
     /* Vision Variables */
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
+    private TfodProcessor tfod;
+    private static final String[] LABELS = {
+            "Blue_Bolt",
+            "Red_Bolt",
+    };
     /**
      * The variable to store our instance of the AprilTag processor.
      */
@@ -109,12 +117,8 @@ public class RightAutoNotBackStage extends LinearOpMode {
     /**
      * The variable to store our instance of the TensorFlow Object Detection processor.
      */
-    private TfodProcessor tfod;
 
-    private static final String[] LABELS = {
-            "Blue_Bolt",
-            "Red_Bolt",
-    };
+
 
     private boolean isPropDetected = false;
     /**
@@ -166,9 +170,34 @@ public class RightAutoNotBackStage extends LinearOpMode {
     static final double     P_DRIVE_GAIN           = 0.03;     // Larger is more responsive, but also less stable
     static int TeamElementPosition = 1; //default to 1 = left 2 = center 3 = right
 
+
+    private VisionPortal visionPortal;               // Used to manage the video source.
+    static int DESIRED_TAG_ID = -1;     // Choose the tag you want to approach or set to -1 for ANY tag.
+    final double SPEED_GAIN  =  0.02  ;   //  Forward Speed Control "Gain". eg: Ramp up to 50% power at a 25 inch error.   (0.50 / 25.0)
+    final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
+    final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
+
+    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
+    final double DESIRED_DISTANCE = 6; //  this is how close the camera should get to the target (inches)
+
+    private AprilTagDetection desiredTag = null;
+
     @Override
     public void runOpMode() {
         initDoubleVision();
+
+
+        boolean targetFound     = false;    // Set to true when an AprilTag target is detected
+        double  drive           = 0;        // Desired forward power/speed (-1 to +1)
+        double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
+        double  turn            = 0;        // Desired turning power/speed (-1 to +1)
+
+       // initAprilTag();
+
+        if (USE_WEBCAM)
+            setManualExposure(6, 250);  // Use low exposure time to reduce motion blur
 
         // Initialize the drive system variables.
         leftFrontDrive = hardwareMap.get(DcMotor.class, "Front_Left");
@@ -210,12 +239,27 @@ public class RightAutoNotBackStage extends LinearOpMode {
         // Wait for the game to start (Display Gyro value while waiting)
         while (opModeInInit()) {
             myVisionPortal.setProcessorEnabled(tfod, true);
+            myVisionPortal.setProcessorEnabled(aprilTag, true);
             telemetryTfod();
             telemetry.update();
             sleep(20);
 
         }
+        myVisionPortal.setProcessorEnabled(tfod, false);
+        targetFound = false;
+        desiredTag = null;
 
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        for (AprilTagDetection detection : currentDetections) {
+            if ((detection.metadata != null) &&
+                    ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))  ){
+                targetFound = true;
+                desiredTag = detection;
+                break;  // don't look any further.
+            } else {
+                telemetry.addData("Unknown Target", "Tag ID %d is not in TagLibrary\n", detection.id);
+            }
+        }
         // Set the encoders for closed loop speed control, and reset the heading.
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -236,23 +280,76 @@ public class RightAutoNotBackStage extends LinearOpMode {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
             driveStraight(DRIVE_SPEED, 20, -25.0);
             turnToHeading( TURN_SPEED, -25.0);
-            sleep(500);
+            waittimer(.5);
 
         }
         else {
 
             driveStraight(DRIVE_SPEED, 35.0,40.0);
             turnToHeading( TURN_SPEED, 40.0);
-            sleep(500);
+            waittimer(.5);
 
         }
 
-        driveStraight( DRIVE_SPEED, -23, 0.0);
-        turnToHeading(TURN_SPEED, 0.0);
-        holdHeading( TURN_SPEED, 0.0, 0.5);
+        if (TeamElementPosition == 2) {
+            driveStraight(DRIVE_SPEED, -23.0, 0.0);
+        }
+        else if (TeamElementPosition == 3) {
+            driveStraight(DRIVE_SPEED, -20, 0.0);
+            turnToHeading( TURN_SPEED, 0.0);
+            waittimer(.5);
+
+        }
+        else {
+
+            driveStraight(DRIVE_SPEED, -35.0,0.0);
+            turnToHeading( TURN_SPEED, 0.0);
+            waittimer(.5);
+
+        }
+
+        StrafeRight(DRIVE_SPEED, 20, 0.0);
+        holdHeading(TURN_SPEED, 0.0, 0.5);
 
 
-        /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
+
+        waittimer(1);
+
+        driveStraight(DRIVE_SPEED, 43.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, 0.5);
+
+        waittimer(1);
+
+        turnToHeading(TURN_SPEED, 90.0 );
+        driveStraight(DRIVE_SPEED, 120.0, 90.0);
+        holdHeading(TURN_SPEED, 135.0, 0.5);
+
+
+
+        if (targetFound) {
+
+            turnToHeading(TURN_SPEED, 45.0);
+            // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+            double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+            double headingError = desiredTag.ftcPose.bearing;
+            double yawError = desiredTag.ftcPose.yaw;
+            while (rangeError <= 0.5) {
+
+                // Use the speed and turn "gains" to calculate how we want the robot to move.
+                drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+                turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+
+                telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                moveRobot2AprilTag(drive, strafe, turn);
+                rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+                headingError = desiredTag.ftcPose.bearing;
+                yawError = desiredTag.ftcPose.yaw;
+            }
+            driveStraight(DRIVE_SPEED,0.0, 0.0);
+        }
+
+     /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
 
@@ -270,12 +367,20 @@ public class RightAutoNotBackStage extends LinearOpMode {
 
         DiagonalRight(DRIVE_SPEED, -10.0, 0.0);
         holdHeading(TURN_SPEED, 0.0, .5);
-/*
+
         DiagonalLeft(DRIVE_SPEED, 10.0, 0.0);
         holdHeading(TURN_SPEED, 0.0, 0.5);
 
         DiagonalLeft(DRIVE_SPEED, -10.0, 0.0);
-        holdHeading(TURN_SPEED, 0.0, 0.5);*/
+        holdHeading(TURN_SPEED, 0.0, 0.5);
+
+        StrafeLeft(DRIVE_SPEED, 20.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, 0.5);
+
+        StrafeRight(DRIVE_SPEED, 20.0, 0.0);
+        holdHeading(TURN_SPEED, 0.0, 0.5);
+*/
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -354,10 +459,11 @@ public class RightAutoNotBackStage extends LinearOpMode {
 
             // Stop all motion & Turn off RUN_TO_POSITION
             moveRobot(0, 0);
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         }
     }
 
@@ -410,11 +516,37 @@ public class RightAutoNotBackStage extends LinearOpMode {
 
             // Stop all motion & Turn off RUN_TO_POSITION
             moveRobot(0, 0);
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
+    }
+
+    public void moveRobot2AprilTag(double x, double y, double yaw) {
+        // Calculate wheel powers.
+        double leftFrontPower    =  x - y -yaw;
+        double rightFrontPower   =  x + y +yaw;
+        double leftBackPower     =  x + y -yaw;
+        double rightBackPower    =  x - y +yaw;
+
+        // Normalize wheel powers to be less than 1.0
+        double max = Math.max(Math.abs(leftFrontPower), Math.abs(rightFrontPower));
+        max = Math.max(max, Math.abs(leftBackPower));
+        max = Math.max(max, Math.abs(rightBackPower));
+
+        if (max > 1.0) {
+            leftFrontPower /= max;
+            rightFrontPower /= max;
+            leftBackPower /= max;
+            rightBackPower /= max;
+        }
+
+        // Send powers to the wheels.
+        leftFrontDrive.setPower(leftFrontPower*.75);
+        rightFrontDrive.setPower(rightFrontPower*.75);
+        leftBackDrive.setPower(leftBackPower*.75);
+        rightBackDrive.setPower(rightBackPower*.75);
     }
     public void driveStraight(double maxDriveSpeed,
                               double distance,
@@ -427,8 +559,8 @@ public class RightAutoNotBackStage extends LinearOpMode {
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
             leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
             rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+            //leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            //rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
             leftFrontDrive.setTargetPosition(leftTarget);
@@ -761,7 +893,7 @@ public class RightAutoNotBackStage extends LinearOpMode {
                 .setModelAspectRatio(16.0 / 9.0)
                  */
                 .build();
-
+        tfod.setClippingMargins(100, 200, 100, 0);
         // -----------------------------------------------------------------------------------------
         // Camera Configuration
         // -----------------------------------------------------------------------------------------
@@ -800,39 +932,7 @@ public class RightAutoNotBackStage extends LinearOpMode {
         }   // end for() loop
 
     }   // end method telemetryAprilTag()
-    private void telemetryTfod() {
-        List<Recognition> currentRecognitions = tfod.getRecognitions();
-        telemetry.addData("# Objects Detected", currentRecognitions.size());
 
-        // Step through the list of recognitions and display info for each one.
-        for (Recognition recognition : currentRecognitions) {
-            double x = (recognition.getLeft() + recognition.getRight()) / 2;
-            double y = (recognition.getTop() + recognition.getBottom()) / 2;
-
-            telemetry.addData("", " ");
-            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
-            telemetry.addData("- Position", "%.0f / %.0f", x, y);
-            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
-            telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
-            if (recognition.getLabel().equals("Blue_Bolt")) {
-                isPropDetected = true;
-                telemetry.addData("Object Detected", "Bolt Prop");
-                if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
-                    TeamElementPosition = 3;
-                    telemetry.addData("Spike Position", "Spike 3");
-                } else {
-                    TeamElementPosition = 2;
-                    telemetry.addData("Spike Position", "Spike 2");
-                }
-            }
-
-
-        }   // end method telemetryTfod()
-        if (currentRecognitions.size() == 0) {
-            TeamElementPosition = 1;
-            telemetry.addData("Spike Position", "Spike 1");
-        }   // end for() loop
-    }
     private void sendTelemetry(boolean straight) {
 
         if (straight) {
@@ -853,8 +953,104 @@ public class RightAutoNotBackStage extends LinearOpMode {
     /**
      * read the Robot heading directly from the IMU (in degrees)
      */
+    public void waittimer(double time) {
+        ElapsedTime holdTimer = new ElapsedTime();
+        holdTimer.reset();
+
+
+        while (holdTimer.time() < time){
+
+        }
+
+    }
     public double getHeading() {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         return orientation.getYaw(AngleUnit.DEGREES);
+    }
+    private void initAprilTag() {
+        // Create the AprilTag processor by using a builder.
+        aprilTag = new AprilTagProcessor.Builder().build();
+
+        // Create the vision portal by using a builder.
+        if (USE_WEBCAM) {
+            visionPortal = new VisionPortal.Builder()
+                    .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                    .addProcessor(aprilTag)
+                    .build();
+        } else {
+            visionPortal = new VisionPortal.Builder()
+                    .setCamera(BuiltinCameraDirection.BACK)
+                    .addProcessor(aprilTag)
+                    .build();
+        }
+    }
+    private void    setManualExposure(int exposureMS, int gain) {
+        // Wait for the camera to be open, then use the controls
+
+        if (visionPortal == null) {
+            return;
+        }
+
+        // Make sure camera is streaming before we try to set the exposure controls
+        if (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING) {
+            telemetry.addData("Camera", "Waiting");
+            telemetry.update();
+            while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
+                sleep(20);
+            }
+            telemetry.addData("Camera", "Ready");
+            telemetry.update();
+        }
+
+        // Set camera controls unless we are stopping.
+        if (!isStopRequested())
+        {
+            ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
+            if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
+                exposureControl.setMode(ExposureControl.Mode.Manual);
+                sleep(50);
+            }
+            exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
+            sleep(20);
+            GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
+            gainControl.setGain(gain);
+            sleep(20);
+        }
+    }
+    private void telemetryTfod() {
+        List<Recognition> currentRecognitions = tfod.getRecognitions();
+        telemetry.addData("# Objects Detected", currentRecognitions.size());
+
+        // Step through the list of recognitions and display info for each one.
+        for (Recognition recognition : currentRecognitions) {
+            double x = (recognition.getLeft() + recognition.getRight()) / 2;
+            double y = (recognition.getTop() + recognition.getBottom()) / 2;
+
+            telemetry.addData("", " ");
+            telemetry.addData("Image", "%s (%.0f %% Conf.)", recognition.getLabel(), recognition.getConfidence() * 100);
+            telemetry.addData("- Position", "%.0f / %.0f", x, y);
+            telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
+            telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
+            if (recognition.getLabel().equals("Blue_Bolt")) {
+                isPropDetected = true;
+                telemetry.addData("Object Detected", "Bolt Prop");
+                if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
+                    TeamElementPosition = 3;
+                    DESIRED_TAG_ID = 3;
+                    telemetry.addData("Spike Position", "Spike 3");
+                } else {
+                    TeamElementPosition = 2;
+                    DESIRED_TAG_ID = 2;
+                    telemetry.addData("Spike Position", "Spike 2");
+                }
+            }
+
+
+        }   // end method telemetryTfod()
+        if (currentRecognitions.size() == 0) {
+            TeamElementPosition = 1;
+            DESIRED_TAG_ID = 1;
+            telemetry.addData("Spike Position", "Spike 1");
+        }   // end for() loop
     }
 }
