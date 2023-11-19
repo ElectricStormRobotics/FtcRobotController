@@ -856,7 +856,7 @@ public class BlueBackStageAprilTag extends LinearOpMode {
                 .setModelAspectRatio(16.0 / 9.0)
                  */
                 .build();
-        tfod.setClippingMargins(100, 200, 100, 0);
+
         // -----------------------------------------------------------------------------------------
         // Camera Configuration
         // -----------------------------------------------------------------------------------------

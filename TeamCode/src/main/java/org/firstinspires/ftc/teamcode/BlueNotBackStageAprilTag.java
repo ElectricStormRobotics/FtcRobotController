@@ -141,6 +141,8 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
     private double  turnSpeed     = 0;
     private double  leftSpeed     = 0;
     private double  rightSpeed    = 0;
+    private double  frontSpeed     = 0;
+    private double  backSpeed    = 0;
     private int     leftTarget    = 0;
     private int     rightTarget   = 0;
 
@@ -245,21 +247,14 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             sleep(20);
 
         }
+        ElapsedTime holdtimer = new ElapsedTime();
+        holdtimer.reset();
+
         myVisionPortal.setProcessorEnabled(tfod, false);
         targetFound = false;
         desiredTag = null;
 
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        for (AprilTagDetection detection : currentDetections) {
-            if ((detection.metadata != null) &&
-                    ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))  ){
-                targetFound = true;
-                desiredTag = detection;
-                break;  // don't look any further.
-            } else {
-                telemetry.addData("Unknown Target", "Tag ID %d is not in TagLibrary\n", detection.id);
-            }
-        }
+
         // Set the encoders for closed loop speed control, and reset the heading.
         leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -308,47 +303,72 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
         }
 
-        StrafeRight(DRIVE_SPEED, 20, 0.0);
+        StrafeRight(DRIVE_SPEED, 20.0, 0.0);
         holdHeading(TURN_SPEED, 0.0, 0.5);
 
 
 
-        waittimer(1);
 
-        driveStraight(DRIVE_SPEED, 43.0, 0.0);
+        driveStraight(DRIVE_SPEED, 49.0, 0.0);
         holdHeading(TURN_SPEED, 0.0, 0.5);
 
-        waittimer(1);
+
 
         turnToHeading(TURN_SPEED, 90.0 );
-        driveStraight(DRIVE_SPEED, 120.0, 90.0);
-        holdHeading(TURN_SPEED, 135.0, 0.5);
+        driveStraight(DRIVE_SPEED, 96.0, 90.0);
 
+        holdHeading(TURN_SPEED, 165.0, 0.5);
+        telemetry.addLine("Hello World");
+        waittimer(2.0);
 
-
-        if (targetFound) {
-
-            turnToHeading(TURN_SPEED, 45.0);
-            // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
-            double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-            double headingError = desiredTag.ftcPose.bearing;
-            double yawError = desiredTag.ftcPose.yaw;
-            while (rangeError <= 0.5) {
-
-                // Use the speed and turn "gains" to calculate how we want the robot to move.
-                drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-                turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
-                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
-
-                telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
-                moveRobot2AprilTag(drive, strafe, turn);
-                rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
-                headingError = desiredTag.ftcPose.bearing;
-                yawError = desiredTag.ftcPose.yaw;
+        while (holdtimer.time() < 25) {
+            List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+            for (AprilTagDetection detection : currentDetections) {
+                if ((detection.metadata != null) &&
+                        ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
+                    targetFound = true;
+                    desiredTag = detection;
+                    telemetry.addLine("Target Found");
+                    break;  // don't look any further.
+                } else {
+                    telemetry.addData("Unknown Target", "Tag ID %d is not in TagLibrary\n", detection.id);
+                }
             }
-            driveStraight(DRIVE_SPEED,0.0, 0.0);
-        }
 
+            if (targetFound) {
+                telemetry.addLine("Target Found");
+                // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+                double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+                double headingError = desiredTag.ftcPose.bearing;
+                double yawError = desiredTag.ftcPose.yaw;
+                while (rangeError >= 0.5) {
+
+                    // Use the speed and turn "gains" to calculate how we want the robot to move.
+                    drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+                    turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+                    strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+
+                    telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                    moveRobot2AprilTag(drive, strafe, turn);
+                    currentDetections = aprilTag.getDetections();
+                    for (AprilTagDetection detection : currentDetections) {
+                        if ((detection.metadata != null) &&
+                                ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
+                            targetFound = true;
+                            desiredTag = detection;
+                            telemetry.addLine("Target Found");
+                            break;  // don't look any further.
+                        } else {
+                            telemetry.addData("Unknown Target", "Tag ID %d is not in TagLibrary\n", detection.id);
+                        }
+                    }
+                    rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+                    headingError = desiredTag.ftcPose.bearing;
+                    yawError = desiredTag.ftcPose.yaw;
+                }
+                driveStraight(DRIVE_SPEED, 0.0, 0.0);
+            }
+        }
      /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
@@ -437,7 +457,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             // Set the required driving speed  (must be positive for RUN_TO_POSITION)
             // Start driving straight, and then enter the control loop
             maxDriveSpeed = Math.abs(maxDriveSpeed);
-            moveRobot(maxDriveSpeed, 0);
+            moveRobotStrafe(maxDriveSpeed, 0);
 
             // keep looping while we are still active, and ALL motors are running.
             while (opModeIsActive() &&
@@ -451,14 +471,14 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                     turnSpeed *= -1.0;
 
                 // Apply the turning correction to the current driving speed.
-                moveRobot(driveSpeed, turnSpeed);
+                moveRobotStrafe(driveSpeed, turnSpeed);
 
                 // Display drive status for the driver.
                 sendTelemetry(true);
             }
 
             // Stop all motion & Turn off RUN_TO_POSITION
-            moveRobot(0, 0);
+            moveRobotStrafe(0, 0);
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -818,7 +838,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
      * @param drive forward motor speed
      * @param turn  clockwise turning motor speed.
      */
-    public void moveRobot(double drive, double turn) {
+        public void moveRobot(double drive, double turn) {
         driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
         turnSpeed  = turn;      // save this value as a class member so it can be used by telemetry.
 
@@ -838,27 +858,25 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         leftBackDrive.setPower(leftSpeed);
         rightBackDrive.setPower(rightSpeed);
     }
-    public void moveRobot4wheel(double drive, double turn) {
+    public void moveRobotStrafe(double drive, double turn) {
         driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
         turnSpeed  = turn;      // save this value as a class member so it can be used by telemetry.
 
-        double leftFrontSpeed = drive - turn;
-        double rightFrontSpeed = drive + turn;
-        double leftBackSpeed = drive - turn;
-        double rightBackSpeed = drive + turn;
+        frontSpeed  = drive - turn;
+        backSpeed = drive + turn;
 
         // Scale speeds down if either one exceeds +/- 1.0;
-        double max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+        double max = Math.max(Math.abs(frontSpeed), Math.abs(backSpeed));
         if (max > 1.0)
         {
-            leftSpeed /= max;
-            rightSpeed /= max;
+            frontSpeed /= max;
+            backSpeed /= max;
         }
 
-        leftFrontDrive.setPower(leftSpeed);
-        rightFrontDrive.setPower(rightSpeed);
-        leftBackDrive.setPower(leftSpeed);
-        rightBackDrive.setPower(rightSpeed);
+        leftFrontDrive.setPower(frontSpeed);
+        rightFrontDrive.setPower(frontSpeed);
+        leftBackDrive.setPower(backSpeed);
+        rightBackDrive.setPower(backSpeed);
     }
     /**
      *  Display the various control parameters while driving
@@ -893,7 +911,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                 .setModelAspectRatio(16.0 / 9.0)
                  */
                 .build();
-        tfod.setClippingMargins(100, 200, 100, 0);
+
         // -----------------------------------------------------------------------------------------
         // Camera Configuration
         // -----------------------------------------------------------------------------------------
