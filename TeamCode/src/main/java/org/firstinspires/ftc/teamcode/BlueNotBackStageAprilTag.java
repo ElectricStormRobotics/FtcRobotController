@@ -160,7 +160,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
     // These constants define the desired driving/control characteristics
     // They can/should be tweaked to suit the specific robot drive train.
-    static final double     DRIVE_SPEED             = 0.45;     // Max driving speed for better distance accuracy.
+    static final double     DRIVE_SPEED             = 0.55;     // Max driving speed for better distance accuracy.
     static final double     TURN_SPEED              = 0.35;     // Max Turn speed to limit turn rate
     static final double     HEADING_THRESHOLD       = 1.0 ;    // How close must the heading get to the target before moving to next step.
                                                                // Requiring more accuracy (a smaller number) will often make the turn take longer to get into the final position.
@@ -182,7 +182,8 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
     final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
-    final double DESIRED_DISTANCE = 6; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 10; //  this is how close the camera should get to the target (inches)
+    private double rangeError = 3; // how close the robot is from desired position from april tag
 
     private AprilTagDetection desiredTag = null;
 
@@ -268,6 +269,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
+
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }
@@ -319,13 +321,17 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
         holdHeading(TURN_SPEED, 165.0, 0.5);
         telemetry.addLine("Hello World");
-        waittimer(2.0);
 
-        while (holdtimer.time() < 25) {
+
+        while (holdtimer.time() < 25 && rangeError > 2.7) {
+
+            targetFound = false;
+            desiredTag = null;
+
             List<AprilTagDetection> currentDetections = aprilTag.getDetections();
             for (AprilTagDetection detection : currentDetections) {
                 if ((detection.metadata != null) &&
-                        ((DESIRED_TAG_ID < 0) || (detection.id == DESIRED_TAG_ID))) {
+                        ( (detection.id == DESIRED_TAG_ID))) {
                     targetFound = true;
                     desiredTag = detection;
                     telemetry.addLine("Target Found");
@@ -334,22 +340,28 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                     telemetry.addData("Unknown Target", "Tag ID %d is not in TagLibrary\n", detection.id);
                 }
             }
-
+            telemetry.update();
             if (targetFound) {
                 telemetry.addLine("Target Found");
+                telemetry.addData("Target", "ID %d (%s)", desiredTag.id, desiredTag.metadata.name);
+                telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
+                telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
+                telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
+                telemetry.update();
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
-                double rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+                rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double headingError = desiredTag.ftcPose.bearing;
                 double yawError = desiredTag.ftcPose.yaw;
-                while (rangeError >= 0.5) {
+                //while (rangeError >= 0.5) {
 
                     // Use the speed and turn "gains" to calculate how we want the robot to move.
-                    drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
-                    turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
-                    strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+                drive = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+                turn = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN);
+                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
 
-                    telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
-                    moveRobot2AprilTag(drive, strafe, turn);
+                telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                moveRobot2AprilTag(drive, strafe, turn);
+                    /*
                     currentDetections = aprilTag.getDetections();
                     for (AprilTagDetection detection : currentDetections) {
                         if ((detection.metadata != null) &&
@@ -357,18 +369,39 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                             targetFound = true;
                             desiredTag = detection;
                             telemetry.addLine("Target Found");
+                            telemetry.update();
                             break;  // don't look any further.
                         } else {
+                            targetFound = false;
+                            moveRobot(0,0);
                             telemetry.addData("Unknown Target", "Tag ID %d is not in TagLibrary\n", detection.id);
-                        }
+                            telemetry.update();
+;                        }
                     }
                     rangeError = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                     headingError = desiredTag.ftcPose.bearing;
                     yawError = desiredTag.ftcPose.yaw;
                 }
-                driveStraight(DRIVE_SPEED, 0.0, 0.0);
+               moveRobot(0,0);
+                     */
             }
+            else {
+                telemetry.addData("RANGEERROR", rangeError);
+                telemetry.addData("DETECTION", "NO VEO NADA");
+                moveRobot(0,0);
+            }
+            telemetry.update();
         }
+        if (holdtimer.time() > 25) {
+            telemetry.addData("OUTATIME", "NO MAS TIEMPO");
+            telemetry.update();
+        }
+
+        turnToHeading(TURN_SPEED, 90.0);
+
+        driveStraight(DRIVE_SPEED, 9.0, 90.0);
+
+
      /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
@@ -563,10 +596,10 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         }
 
         // Send powers to the wheels.
-        leftFrontDrive.setPower(leftFrontPower*.75);
-        rightFrontDrive.setPower(rightFrontPower*.75);
-        leftBackDrive.setPower(leftBackPower*.75);
-        rightBackDrive.setPower(rightBackPower*.75);
+        leftFrontDrive.setPower(leftFrontPower*.55);
+        rightFrontDrive.setPower(rightFrontPower*.55);
+        leftBackDrive.setPower(leftBackPower*.55);
+        rightBackDrive.setPower(rightBackPower*.55);
     }
     public void driveStraight(double maxDriveSpeed,
                               double distance,
@@ -1067,7 +1100,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         }   // end method telemetryTfod()
         if (currentRecognitions.size() == 0) {
             TeamElementPosition = 1;
-            DESIRED_TAG_ID = 1;
+            DESIRED_TAG_ID = 3;
             telemetry.addData("Spike Position", "Spike 1");
         }   // end for() loop
     }
