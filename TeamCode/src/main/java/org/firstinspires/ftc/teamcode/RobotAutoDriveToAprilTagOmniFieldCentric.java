@@ -106,7 +106,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private DcMotor Back_Left = null;  //  Used to control the left back drive wheel
     private DcMotor Back_Right = null;  //  Used to control the right back drive wheel
     private DcMotor Intake = null; // Used for the intake pulleys
-    private DcMotor Slide =null; // Slide motor
+    private DcMotor SlideLeft =null; // First slide motor
+    private DcMotor SlideRight =null;// Second slide motor
     private DcMotor Winch = null; // Raises the Robot
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
@@ -142,7 +143,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Back_Left  = hardwareMap.get(DcMotor.class, "Back_Left");
         Back_Right = hardwareMap.get(DcMotor.class, "Back_Right");
         Intake = hardwareMap.get(DcMotor.class, "Intake");
-        Slide = hardwareMap.get(DcMotor.class, "Slide");
+        SlideLeft = hardwareMap.get(DcMotor.class, "SlideLeft");
+        SlideRight = hardwareMap.get(DcMotor.class, "SlideRight");
         Winch = hardwareMap.get(DcMotor.class, "Winch");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
@@ -156,13 +158,15 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Front_Right.setDirection(DcMotor.Direction.FORWARD);
         Back_Right.setDirection(DcMotor.Direction.FORWARD);
         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
-        Slide.setDirection(DcMotorSimple.Direction.REVERSE);
+        SlideLeft.setDirection(DcMotorSimple.Direction.REVERSE);
         Winch.setDirection(DcMotorSimple.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
-        Bucket.setDirection(Servo.Direction.FORWARD);
+        Bucket.setDirection(Servo.Direction.REVERSE);
         Hanger.setDirection(Servo.Direction.FORWARD);
-        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Slide.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SlideLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SlideRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         Winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -170,8 +174,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         IMU imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
-                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
-                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD));
+                RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
         imu.resetYaw();
@@ -256,14 +260,14 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 DESIRED_TAG_ID = 8;
             }
 
-             else if (gamepad2.y && Wrist.getPosition()<.1 && Slide.getCurrentPosition() <= -200) {
+             else if (gamepad2.y && Wrist.getPosition()<.1 && SlideLeft.getCurrentPosition() <= -200) {
                 Wrist.setPosition(.8);
             }
-             else if (gamepad2.right_bumper && Bucket.getPosition() > 0.1 && Slide.getCurrentPosition() <= -200) {
+             else if (gamepad2.right_bumper && Bucket.getPosition() > 0.1 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(0.0);
                  Wrist.setPosition(0);
              }
-             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.1 && Wrist.getPosition() > .5 && Slide.getCurrentPosition() <= -200) {
+             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.1 && Wrist.getPosition() > .5 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(.6);
 
              }
@@ -314,7 +318,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
-                telemetry.addData("Slide Position", Slide.getCurrentPosition());
+                telemetry.addData("SlideLeft Position", SlideLeft.getCurrentPosition());
+                telemetry.addData("SlideRight Position", SlideRight.getCurrentPosition());
                 telemetry.addData("Wrist Position", Wrist.getPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Servo Position", Hanger.getPosition());
@@ -324,7 +329,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             else {
                 telemetry.addData(">","Drive using joysticks to find valid target\n");
                 telemetry.addData("Wrist Position", Wrist.getPosition());
-                telemetry.addData("Slide Position", Slide.getCurrentPosition());
+                telemetry.addData("SlideLeft Position", SlideLeft.getCurrentPosition());
+                telemetry.addData("SlideRight Position", SlideRight.getCurrentPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
@@ -404,7 +410,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 Back_Left.setPower(backLeftPower);
                 Front_Right.setPower(frontRightPower);
                 Back_Right.setPower(backRightPower);
-                Slide.setPower(gamepad2.left_stick_y);
+                SlideLeft.setPower(gamepad2.left_stick_y);
+                SlideRight.setPower(gamepad2.left_stick_y);
+
             }
             telemetry.update();
         }
