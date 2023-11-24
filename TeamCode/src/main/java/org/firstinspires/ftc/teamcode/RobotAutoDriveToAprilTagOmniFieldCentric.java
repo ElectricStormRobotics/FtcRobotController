@@ -197,7 +197,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         while (opModeInInit()) {
 
             Bucket.setPosition(0.0);
-            Wrist.setPosition(0.0);
+            Wrist.setPosition(0.1);
             Hanger.setPosition(0.0);
 
             if (gamepad1.x) {
@@ -260,14 +260,15 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 DESIRED_TAG_ID = 8;
             }
 
-             else if (gamepad2.y && Wrist.getPosition()<.1 && SlideLeft.getCurrentPosition() <= -200) {
+             else if (gamepad2.y && Wrist.getPosition()<.3 && SlideLeft.getCurrentPosition() <= -200) {
                 Wrist.setPosition(.8);
+                Bucket.setPosition(0.2);
             }
-             else if (gamepad2.right_bumper && Bucket.getPosition() > 0.1 && SlideLeft.getCurrentPosition() <= -200) {
+             else if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(0.0);
-                 Wrist.setPosition(0);
+                 Wrist.setPosition(0.1);
              }
-             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.1 && Wrist.getPosition() > .5 && SlideLeft.getCurrentPosition() <= -200) {
+             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.3 && Wrist.getPosition() > .5 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(.6);
 
              }

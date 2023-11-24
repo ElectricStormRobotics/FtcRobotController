@@ -396,7 +396,10 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             telemetry.addData("OUTATIME", "NO MAS TIEMPO");
             telemetry.update();
         }
-
+        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         turnToHeading(TURN_SPEED, 90.0);
 
         driveStraight(DRIVE_SPEED, 9.0, 90.0);

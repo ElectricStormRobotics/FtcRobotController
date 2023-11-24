@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -126,6 +127,8 @@ public class RightAutoBackstage extends LinearOpMode {
     private DcMotor         rightFrontDrive = null;
     private DcMotor         leftBackDrive = null;
     private DcMotor         rightBackDrive = null;
+    private Servo Wrist =null; // Wrist Servo
+    private Servo Bucket =null; //Bucket Servo
     private IMU      imu         = null;      // Control/Expansion Hub IMU
 
     private double          headingError  = 0;
@@ -137,6 +140,8 @@ public class RightAutoBackstage extends LinearOpMode {
     private double  turnSpeed     = 0;
     private double  leftSpeed     = 0;
     private double  rightSpeed    = 0;
+    private double  frontSpeed     = 0;
+    private double  backSpeed    = 0;
     private int     leftTarget    = 0;
     private int     rightTarget   = 0;
 
@@ -175,6 +180,8 @@ public class RightAutoBackstage extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "Front_Right");
         leftBackDrive = hardwareMap.get(DcMotor.class, "Back_Left");
         rightBackDrive = hardwareMap.get(DcMotor.class, "Back_Right");
+        Wrist = hardwareMap.get(Servo.class, "Wrist");
+        Bucket = hardwareMap.get(Servo.class, "Bucket");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -183,14 +190,16 @@ public class RightAutoBackstage extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        Wrist.setDirection(Servo.Direction.FORWARD);
+        Bucket.setDirection(Servo.Direction.REVERSE);
 
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
          *
          * To Do:  EDIT these two lines to match YOUR mounting configuration.
          */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
@@ -211,6 +220,8 @@ public class RightAutoBackstage extends LinearOpMode {
         while (opModeInInit()) {
             myVisionPortal.setProcessorEnabled(tfod, true);
             telemetryTfod();
+            Bucket.setPosition(0.0);
+            Wrist.setPosition(0.0);
             telemetry.update();
             sleep(20);
 
@@ -229,6 +240,7 @@ public class RightAutoBackstage extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
+
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }
@@ -236,14 +248,14 @@ public class RightAutoBackstage extends LinearOpMode {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
             driveStraight(DRIVE_SPEED, 20, -25.0);
             turnToHeading( TURN_SPEED, -25.0);
-            sleep(500);
+            waittimer(.5);
 
         }
         else {
 
             driveStraight(DRIVE_SPEED, 35.0,40.0);
             turnToHeading( TURN_SPEED, 40.0);
-            sleep(500);
+            waittimer(.5);
 
         }
         if (TeamElementPosition == 2) {
@@ -253,19 +265,43 @@ public class RightAutoBackstage extends LinearOpMode {
 
             driveStraight(DRIVE_SPEED, -20, 0.0);
             turnToHeading( TURN_SPEED, 0.0);
-            sleep(500);
+            waittimer(.5);
 
         }
         else {
 
             driveStraight(DRIVE_SPEED, -30.0,0.0);
             turnToHeading( TURN_SPEED, 0.0);
-            sleep(500);
-
+            waittimer(.5);
         }
 
         turnToHeading(TURN_SPEED, -90.0);
-        driveStraight(DRIVE_SPEED, 32.0, -90.0);
+        driveStraight(DRIVE_SPEED, 28.0, -90.0);
+
+        if (TeamElementPosition == 2) {
+            StrafeLeft(DRIVE_SPEED, 15.0, -90.0);
+            driveStraight(DRIVE_SPEED, 4.0, -90.0);
+            waittimer(.5);
+        }
+        else if (TeamElementPosition == 3) {
+            StrafeLeft(DRIVE_SPEED, 21.0, -90.0);
+            driveStraight(DRIVE_SPEED, 4.0, -90.0);
+            waittimer(.5);
+        }
+        else {
+            StrafeLeft(DRIVE_SPEED, 8.0, -90.0);
+            driveStraight(DRIVE_SPEED, 4.0, -90.0);
+            waittimer(.5);
+        }
+
+        Bucket.setPosition(.2);
+        Wrist.setPosition(.8);
+        waittimer(1);
+        Bucket.setPosition(.7);
+        waittimer(1);
+        Bucket.setPosition(0);
+        Wrist.setPosition(0);
+        waittimer(.5);
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
@@ -347,11 +383,11 @@ public class RightAutoBackstage extends LinearOpMode {
             // Set the required driving speed  (must be positive for RUN_TO_POSITION)
             // Start driving straight, and then enter the control loop
             maxDriveSpeed = Math.abs(maxDriveSpeed);
-            moveRobot(maxDriveSpeed, 0);
+            moveRobotStrafe(maxDriveSpeed, 0);
 
             // keep looping while we are still active, and ALL motors are running.
             while (opModeIsActive() &&
-                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy() && leftBackDrive.isBusy() && rightBackDrive.isBusy())) {
 
                 // Determine required steering to keep on heading
                 turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
@@ -361,18 +397,19 @@ public class RightAutoBackstage extends LinearOpMode {
                     turnSpeed *= -1.0;
 
                 // Apply the turning correction to the current driving speed.
-                moveRobot(driveSpeed, turnSpeed);
+                moveRobotStrafe(driveSpeed, turnSpeed);
 
                 // Display drive status for the driver.
                 sendTelemetry(true);
             }
 
             // Stop all motion & Turn off RUN_TO_POSITION
-            moveRobot(0, 0);
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            moveRobotStrafe(0, 0);
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            waittimer(.2);
         }
     }
 
@@ -403,11 +440,11 @@ public class RightAutoBackstage extends LinearOpMode {
             // Set the required driving speed  (must be positive for RUN_TO_POSITION)
             // Start driving straight, and then enter the control loop
             maxDriveSpeed = Math.abs(maxDriveSpeed);
-            moveRobot(maxDriveSpeed, 0);
+            moveRobotStrafe(maxDriveSpeed, 0);
 
             // keep looping while we are still active, and ALL motors are running.
             while (opModeIsActive() &&
-                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy() && leftBackDrive.isBusy() && rightBackDrive.isBusy())) {
 
                 // Determine required steering to keep on heading
                 turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
@@ -417,18 +454,19 @@ public class RightAutoBackstage extends LinearOpMode {
                     turnSpeed *= -1.0;
 
                 // Apply the turning correction to the current driving speed.
-                moveRobot(driveSpeed, turnSpeed);
+                moveRobotStrafe(driveSpeed, turnSpeed);
 
                 // Display drive status for the driver.
                 sendTelemetry(true);
             }
 
             // Stop all motion & Turn off RUN_TO_POSITION
-            moveRobot(0, 0);
-            leftFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-            rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            moveRobotStrafe(0, 0);
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            waittimer(.2);
         }
     }
     public void driveStraight(double maxDriveSpeed,
@@ -720,6 +758,36 @@ public class RightAutoBackstage extends LinearOpMode {
         rightFrontDrive.setPower(rightSpeed);
         leftBackDrive.setPower(leftSpeed);
         rightBackDrive.setPower(rightSpeed);
+    }
+    public void moveRobotStrafe(double drive, double turn) {
+        driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
+        turnSpeed  = turn;      // save this value as a class member so it can be used by telemetry.
+
+        frontSpeed  = drive - turn;
+        backSpeed = drive + turn;
+
+        // Scale speeds down if either one exceeds +/- 1.0;
+        double max = Math.max(Math.abs(frontSpeed), Math.abs(backSpeed));
+        if (max > 1.0)
+        {
+            frontSpeed /= max;
+            backSpeed /= max;
+        }
+
+        leftFrontDrive.setPower(frontSpeed);
+        rightFrontDrive.setPower(frontSpeed);
+        leftBackDrive.setPower(backSpeed);
+        rightBackDrive.setPower(backSpeed);
+    }
+    public void waittimer(double time) {
+        ElapsedTime holdTimer = new ElapsedTime();
+        holdTimer.reset();
+
+
+        while (holdTimer.time() < time){
+
+        }
+
     }
     public void moveRobot4wheel(double drive, double turn) {
         driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
