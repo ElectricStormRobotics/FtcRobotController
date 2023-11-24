@@ -144,6 +144,10 @@ public class RightAutoBackstage extends LinearOpMode {
     private double  backSpeed    = 0;
     private int     leftTarget    = 0;
     private int     rightTarget   = 0;
+    private  int    rightfrontTarget = 0;
+    private int     leftfrontTarget = 0;
+    private  int    rightbackTarget = 0;
+    private int     leftbackTarget = 0;
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
@@ -365,16 +369,16 @@ public class RightAutoBackstage extends LinearOpMode {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
-            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            //leftTarget = leftBackDrive.getCurrentPosition() - moveCounts;
-           //rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+            leftfrontTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
+            rightfrontTarget = rightFrontDrive.getCurrentPosition() - moveCounts;
+            leftbackTarget = leftBackDrive.getCurrentPosition() - moveCounts;
+           rightbackTarget = rightBackDrive.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(leftTarget);
-            rightFrontDrive.setTargetPosition(-rightTarget);
-            leftBackDrive.setTargetPosition(-leftTarget);
-            rightBackDrive.setTargetPosition(rightTarget);
+            leftFrontDrive.setTargetPosition(leftfrontTarget);
+            rightFrontDrive.setTargetPosition(rightfrontTarget);
+            leftBackDrive.setTargetPosition(leftbackTarget);
+            rightBackDrive.setTargetPosition(rightbackTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -422,16 +426,16 @@ public class RightAutoBackstage extends LinearOpMode {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
-            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            //leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
-            //rightTarget = rightBackDrive.getCurrentPosition() - moveCounts;
+            leftfrontTarget = leftFrontDrive.getCurrentPosition() - moveCounts;
+            rightfrontTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
+            leftbackTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            rightbackTarget = rightBackDrive.getCurrentPosition() - moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(-leftTarget);
-            rightFrontDrive.setTargetPosition(rightTarget);
-            leftBackDrive.setTargetPosition(leftTarget);
-            rightBackDrive.setTargetPosition(-rightTarget);
+            leftFrontDrive.setTargetPosition(leftfrontTarget);
+            rightFrontDrive.setTargetPosition(rightfrontTarget);
+            leftBackDrive.setTargetPosition(leftbackTarget);
+            rightBackDrive.setTargetPosition(rightbackTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -454,7 +458,7 @@ public class RightAutoBackstage extends LinearOpMode {
                     turnSpeed *= -1.0;
 
                 // Apply the turning correction to the current driving speed.
-                moveRobotStrafe(driveSpeed, turnSpeed);
+                moveRobotStrafe(driveSpeed, -turnSpeed);
 
                 // Display drive status for the driver.
                 sendTelemetry(true);

@@ -144,6 +144,10 @@ public class LeftAutoBackstage extends LinearOpMode {
     private double  backSpeed    = 0;
     private int     leftTarget    = 0;
     private int     rightTarget   = 0;
+    private  int    rightfrontTarget = 0;
+    private int     leftfrontTarget = 0;
+    private  int    rightbackTarget = 0;
+    private int     leftbackTarget = 0;
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
@@ -277,6 +281,8 @@ public class LeftAutoBackstage extends LinearOpMode {
 
         turnToHeading(TURN_SPEED, 90.0);
         driveStraight(DRIVE_SPEED, 32.0, 90.0);
+        holdHeading(TURN_SPEED, 90.0, 2.0);
+
         if (TeamElementPosition == 2) {
             StrafeRight(DRIVE_SPEED, 15.0, 90.0);
             //driveStraight(DRIVE_SPEED, 4.0, 90.0);
@@ -284,12 +290,12 @@ public class LeftAutoBackstage extends LinearOpMode {
         }
         else if (TeamElementPosition == 3) {
             StrafeRight(DRIVE_SPEED, 21.0, 90.0);
-            //driveStraight(DRIVE_SPEED, 4.0, 90.0);
+            driveStraight(DRIVE_SPEED, 4.0, 90.0);
             waittimer(.5);
         }
         else {
             StrafeRight(DRIVE_SPEED, 8.0, 90.0);
-            //driveStraight(DRIVE_SPEED, 4.0, 90.0);
+            driveStraight(DRIVE_SPEED, 4.0, 90.0);
             waittimer(.5);
         }
 
@@ -363,16 +369,16 @@ public class LeftAutoBackstage extends LinearOpMode {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
-            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            //leftTarget = leftBackDrive.getCurrentPosition() - moveCounts;
-           //rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+            leftfrontTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
+            rightfrontTarget = rightFrontDrive.getCurrentPosition() - moveCounts;
+            leftbackTarget = leftBackDrive.getCurrentPosition() - moveCounts;
+           rightbackTarget = rightBackDrive.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(leftTarget);
-            rightFrontDrive.setTargetPosition(-rightTarget);
-            leftBackDrive.setTargetPosition(-leftTarget);
-            rightBackDrive.setTargetPosition(rightTarget);
+            leftFrontDrive.setTargetPosition(leftfrontTarget);
+            rightFrontDrive.setTargetPosition(rightfrontTarget);
+            leftBackDrive.setTargetPosition(leftbackTarget);
+            rightBackDrive.setTargetPosition(rightbackTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -398,7 +404,7 @@ public class LeftAutoBackstage extends LinearOpMode {
                 moveRobotStrafe(driveSpeed, turnSpeed);
 
                 // Display drive status for the driver.
-                sendTelemetry(true);
+                sendTelemetry(false);
             }
 
             // Stop all motion & Turn off RUN_TO_POSITION
@@ -420,16 +426,16 @@ public class LeftAutoBackstage extends LinearOpMode {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
-            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            //leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
-            //rightTarget = rightBackDrive.getCurrentPosition() - moveCounts;
+            leftfrontTarget = leftFrontDrive.getCurrentPosition() - moveCounts;
+            rightfrontTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
+            leftbackTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            rightbackTarget = rightBackDrive.getCurrentPosition() - moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(-leftTarget);
+            leftFrontDrive.setTargetPosition(leftTarget);
             rightFrontDrive.setTargetPosition(rightTarget);
             leftBackDrive.setTargetPosition(leftTarget);
-            rightBackDrive.setTargetPosition(-rightTarget);
+            rightBackDrive.setTargetPosition(rightTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -783,7 +789,7 @@ public class LeftAutoBackstage extends LinearOpMode {
 
 
         while (holdTimer.time() < time){
-
+        sendTelemetry(true);
         }
 
     }
@@ -928,6 +934,13 @@ public class LeftAutoBackstage extends LinearOpMode {
         telemetry.addData("Heading- Target : Current", "%5.2f : %5.0f", targetHeading, getHeading());
         telemetry.addData("Error  : Steer Pwr",  "%5.1f : %5.1f", headingError, turnSpeed);
         telemetry.addData("Wheel Speeds L : R", "%5.2f : %5.2f", leftSpeed, rightSpeed);
+
+        //added stuff
+        telemetry.addData("Wheel Speeds F : B", "%5.2f : %5.2f", frontSpeed, backSpeed);
+        telemetry.addData("LF Encoder: ", leftFrontDrive.getCurrentPosition());
+        telemetry.addData("LB Encoder: ", leftBackDrive.getCurrentPosition());
+        telemetry.addData("RF Encoder:", rightFrontDrive.getCurrentPosition());
+        telemetry.addData("RB Encoder:", rightBackDrive.getCurrentPosition());
         telemetry.update();
     }
 
