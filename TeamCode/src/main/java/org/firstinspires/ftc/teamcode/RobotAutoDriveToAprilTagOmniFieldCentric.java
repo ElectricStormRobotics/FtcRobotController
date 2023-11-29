@@ -112,6 +112,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
     private Servo Hanger = null; //Hanger Servo
+    private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
@@ -122,7 +123,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int blueTeam = 1;
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
-    double intakePwr = -0.8; // sets the pwr to things
+    double intakePwr = 1; // sets the pwr to things
 
 
 
@@ -149,6 +150,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         Hanger = hardwareMap.get(Servo.class,"Hanger");
+        IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -163,6 +165,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.REVERSE);
         Hanger.setDirection(Servo.Direction.FORWARD);
+        IntakeLinkage.setDirection(Servo.Direction.FORWARD);
+        Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         SlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         SlideLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         SlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -196,10 +201,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeInInit()) {
 
-            Bucket.setPosition(0.0);
-            Wrist.setPosition(0.1);
+            Bucket.setPosition(0.025);
+            Wrist.setPosition(0.0);
             Hanger.setPosition(0.0);
-
+            IntakeLinkage.setPosition(0.0);
+            telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
             if (gamepad1.x) {
                 blueTeam = 1;
                 redTeam = 0;
@@ -225,6 +231,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeIsActive())
         {
+            IntakeLinkage.setPosition(0.8);
             targetFound = false;
             desiredTag  = null;
 
@@ -261,16 +268,16 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             }
 
              else if (gamepad2.y && Wrist.getPosition()<.3 && SlideLeft.getCurrentPosition() <= -200) {
-                Wrist.setPosition(.8);
-                Bucket.setPosition(0.2);
+                Wrist.setPosition(.7);
+                Bucket.setPosition(0.3);
             }
              else if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
-                 Bucket.setPosition(0.0);
-                 Wrist.setPosition(0.1);
+                 Bucket.setPosition(0.05);
+                 Wrist.setPosition(0.0);
              }
              else if (gamepad2.left_bumper && Bucket.getPosition() < 0.3 && Wrist.getPosition() > .5 && SlideLeft.getCurrentPosition() <= -200) {
-                 Bucket.setPosition(.6);
-
+                 Wrist.setPosition(0.8);
+                 Bucket.setPosition(.7);
              }
              else if (gamepad2.a) {
                  Hanger.setPosition(0);
@@ -334,6 +341,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("SlideRight Position", SlideRight.getCurrentPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Servo Position", Hanger.getPosition());
+                telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
                 telemetry.update();
             }
 

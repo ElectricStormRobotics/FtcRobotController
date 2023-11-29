@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -126,6 +127,7 @@ public class LeftAutoNotBackstage extends LinearOpMode {
     private DcMotor         rightFrontDrive = null;
     private DcMotor         leftBackDrive = null;
     private DcMotor         rightBackDrive = null;
+    private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
     private IMU      imu         = null;      // Control/Expansion Hub IMU
 
     private double          headingError  = 0;
@@ -175,6 +177,7 @@ public class LeftAutoNotBackstage extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "Front_Right");
         leftBackDrive = hardwareMap.get(DcMotor.class, "Back_Left");
         rightBackDrive = hardwareMap.get(DcMotor.class, "Back_Right");
+        IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -183,14 +186,15 @@ public class LeftAutoNotBackstage extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        IntakeLinkage.setDirection(Servo.Direction.FORWARD);
 
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
          *
          * To Do:  EDIT these two lines to match YOUR mounting configuration.
          */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
@@ -229,6 +233,7 @@ public class LeftAutoNotBackstage extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
+        IntakeLinkage.setPosition(0.0);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }

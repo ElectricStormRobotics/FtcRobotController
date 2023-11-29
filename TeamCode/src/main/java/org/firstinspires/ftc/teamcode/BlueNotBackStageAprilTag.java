@@ -34,6 +34,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -130,6 +131,9 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
     private DcMotor         rightFrontDrive = null;
     private DcMotor         leftBackDrive = null;
     private DcMotor         rightBackDrive = null;
+    private Servo Wrist =null; // Wrist Servo
+    private Servo Bucket =null; //Bucket Servo
+    private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
     private IMU      imu         = null;      // Control/Expansion Hub IMU
 
     private double          headingError  = 0;
@@ -145,6 +149,10 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
     private double  backSpeed    = 0;
     private int     leftTarget    = 0;
     private int     rightTarget   = 0;
+    private  int    rightfrontTarget = 0;
+    private int     leftfrontTarget = 0;
+    private  int    rightbackTarget = 0;
+    private int     leftbackTarget = 0;
 
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
@@ -207,6 +215,9 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         rightFrontDrive = hardwareMap.get(DcMotor.class, "Front_Right");
         leftBackDrive = hardwareMap.get(DcMotor.class, "Back_Left");
         rightBackDrive = hardwareMap.get(DcMotor.class, "Back_Right");
+        Wrist = hardwareMap.get(Servo.class, "Wrist");
+        Bucket = hardwareMap.get(Servo.class, "Bucket");
+        IntakeLinkage = hardwareMap.get(Servo.class, "Intake Linkage");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -215,14 +226,17 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         leftBackDrive.setDirection(DcMotor.Direction.REVERSE);
         rightFrontDrive.setDirection(DcMotor.Direction.FORWARD);
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
+        Wrist.setDirection(Servo.Direction.FORWARD);
+        Bucket.setDirection(Servo.Direction.REVERSE);
+        IntakeLinkage.setDirection(Servo.Direction.FORWARD);
 
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
          *
          * To Do:  EDIT these two lines to match YOUR mounting configuration.
          */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.LEFT;
-        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
@@ -243,6 +257,9 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         while (opModeInInit()) {
             myVisionPortal.setProcessorEnabled(tfod, true);
             myVisionPortal.setProcessorEnabled(aprilTag, true);
+            IntakeLinkage.setPosition(0.0);
+            Bucket.setPosition(0.0);
+            Wrist.setPosition(0.0);
             telemetryTfod();
             telemetry.update();
             sleep(20);
@@ -269,7 +286,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
-
+        IntakeLinkage.setPosition(0.0);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }
@@ -386,7 +403,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                      */
             }
             else {
-                telemetry.addData("RANGEERROR", rangeError);
+                telemetry.addData("RANGE ERROR", rangeError);
                 telemetry.addData("DETECTION", "NO VEO NADA");
                 moveRobot(0,0);
             }
@@ -404,6 +421,15 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
         driveStraight(DRIVE_SPEED, 9.0, 90.0);
 
+        Bucket.setPosition(.3);
+        Wrist.setPosition(.7);
+        waittimer(1);
+        Wrist.setPosition(0.8);
+        Bucket.setPosition(.7);
+        waittimer(1);
+        Bucket.setPosition(0);
+        Wrist.setPosition(0);
+        waittimer(.5);
 
      /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
@@ -467,24 +493,24 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
     *                   If a relative angle is required, add/subtract from the current robotHeading.
     */
     public void StrafeRight(double maxDriveSpeed,
-                           double distance,
-                           double heading) {
+                            double distance,
+                            double heading) {
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
-            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            //leftTarget = leftBackDrive.getCurrentPosition() - moveCounts;
-           //rightTarget = rightBackDrive.getCurrentPosition() + moveCounts;
+            leftfrontTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
+            rightfrontTarget = rightFrontDrive.getCurrentPosition() - moveCounts;
+            leftbackTarget = leftBackDrive.getCurrentPosition() - moveCounts;
+            rightbackTarget = rightBackDrive.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(leftTarget);
-            rightFrontDrive.setTargetPosition(-rightTarget);
-            leftBackDrive.setTargetPosition(-leftTarget);
-            rightBackDrive.setTargetPosition(rightTarget);
+            leftFrontDrive.setTargetPosition(leftfrontTarget);
+            rightFrontDrive.setTargetPosition(rightfrontTarget);
+            leftBackDrive.setTargetPosition(leftbackTarget);
+            rightBackDrive.setTargetPosition(rightbackTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -497,7 +523,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
             // keep looping while we are still active, and ALL motors are running.
             while (opModeIsActive() &&
-                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy() && leftBackDrive.isBusy() && rightBackDrive.isBusy())) {
 
                 // Determine required steering to keep on heading
                 turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
@@ -510,7 +536,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                 moveRobotStrafe(driveSpeed, turnSpeed);
 
                 // Display drive status for the driver.
-                sendTelemetry(true);
+                sendTelemetry(false);
             }
 
             // Stop all motion & Turn off RUN_TO_POSITION
@@ -519,7 +545,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
+            waittimer(.2);
         }
     }
 
@@ -657,6 +683,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         }
     }
     public void DiagonalRight (double maxDriveSpeed,

@@ -129,6 +129,7 @@ public class LeftAutoBackstage extends LinearOpMode {
     private DcMotor         rightBackDrive = null;
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
+    private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
     private IMU      imu         = null;      // Control/Expansion Hub IMU
 
     private double          headingError  = 0;
@@ -186,6 +187,7 @@ public class LeftAutoBackstage extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "Back_Right");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
+        IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -196,6 +198,7 @@ public class LeftAutoBackstage extends LinearOpMode {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.REVERSE);
+        IntakeLinkage.setDirection(Servo.Direction.FORWARD);
 
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
@@ -225,6 +228,7 @@ public class LeftAutoBackstage extends LinearOpMode {
             myVisionPortal.setProcessorEnabled(tfod, true);
             Bucket.setPosition(0.0);
             Wrist.setPosition(0.0);
+            IntakeLinkage.setPosition(0.0);
             telemetryTfod();
             telemetry.update();
             sleep(20);
@@ -244,6 +248,7 @@ public class LeftAutoBackstage extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
+        IntakeLinkage.setPosition(0.0);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
         }
@@ -280,28 +285,29 @@ public class LeftAutoBackstage extends LinearOpMode {
         }
 
         turnToHeading(TURN_SPEED, 90.0);
-        driveStraight(DRIVE_SPEED, 32.0, 90.0);
+        driveStraight(DRIVE_SPEED, 31.0, 90.0);
         holdHeading(TURN_SPEED, 90.0, 2.0);
 
         if (TeamElementPosition == 2) {
-            StrafeRight(DRIVE_SPEED, 15.0, 90.0);
-            //driveStraight(DRIVE_SPEED, 4.0, 90.0);
+            StrafeRight(DRIVE_SPEED, 36.0, 90.0);
+            driveStraight(DRIVE_SPEED, 7.5, 90.0);
             waittimer(.5);
         }
         else if (TeamElementPosition == 3) {
-            StrafeRight(DRIVE_SPEED, 21.0, 90.0);
-            driveStraight(DRIVE_SPEED, 4.0, 90.0);
+            StrafeRight(DRIVE_SPEED, 42.0, 90.0);
+            driveStraight(DRIVE_SPEED, 7.5, 90.0);
             waittimer(.5);
         }
         else {
-            StrafeRight(DRIVE_SPEED, 8.0, 90.0);
-            driveStraight(DRIVE_SPEED, 4.0, 90.0);
+            StrafeRight(DRIVE_SPEED, 24.0, 90.0);
+            driveStraight(DRIVE_SPEED, 7.5, 90.0);
             waittimer(.5);
         }
 
-        Bucket.setPosition(.2);
-        Wrist.setPosition(.8);
+        Bucket.setPosition(.3);
+        Wrist.setPosition(.7);
         waittimer(1);
+        Wrist.setPosition(0.8);
         Bucket.setPosition(.7);
         waittimer(1);
         Bucket.setPosition(0);
