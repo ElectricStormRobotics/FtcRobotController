@@ -251,12 +251,32 @@ public class LeftAutoBackstage extends LinearOpMode {
         IntakeLinkage.setPosition(0.0);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
+            driveStraight(DRIVE_SPEED, -23.0, 0.0);
+
+            turnToHeading(TURN_SPEED, 90.0);
+            driveStraight(DRIVE_SPEED, 31.0, 90.0);
+            holdHeading(TURN_SPEED, 90.0, 1.0);
+
+            StrafeRight(DRIVE_SPEED, 27.0, 90.0);
+            driveStraight(DRIVE_SPEED, 10.0, 90.0);
+            waittimer(.5);
         }
         else if (TeamElementPosition == 3) {
             driveStraight(DRIVE_SPEED, 33.0, -40.0);
             turnToHeading( TURN_SPEED, -40.0);
             sleep(500);
 
+            driveStraight(DRIVE_SPEED, -28.0, 0.0);
+            turnToHeading( TURN_SPEED, 0.0);
+            sleep(500);
+
+            turnToHeading(TURN_SPEED, 90.0);
+            driveStraight(DRIVE_SPEED, 31.0, 90.0);
+            holdHeading(TURN_SPEED, 90.0, 1.0);
+
+            StrafeRight(DRIVE_SPEED, 33.0, 90.0);
+            driveStraight(DRIVE_SPEED, 12.0, 90.0);
+            waittimer(.5);
         }
         else {
 
@@ -265,54 +285,27 @@ public class LeftAutoBackstage extends LinearOpMode {
             turnToHeading( TURN_SPEED, 25.0);
             sleep(500);
 
-        }
-
-        if (TeamElementPosition == 2) {
-            driveStraight(DRIVE_SPEED, -23.0, 0.0);
-        }
-        else if (TeamElementPosition == 3) {
-            driveStraight(DRIVE_SPEED, -28.0, 0.0);
-            turnToHeading( TURN_SPEED, 0.0);
-            sleep(500);
-
-        }
-        else {
-
             driveStraight(DRIVE_SPEED, -20.0, 0.0);
             turnToHeading( TURN_SPEED, 0.0);
             sleep(500);
 
-        }
+            turnToHeading(TURN_SPEED, 90.0);
+            driveStraight(DRIVE_SPEED, 31.0, 90.0);
+            holdHeading(TURN_SPEED, 90.0, 1.0);
 
-        turnToHeading(TURN_SPEED, 90.0);
-        driveStraight(DRIVE_SPEED, 31.0, 90.0);
-        holdHeading(TURN_SPEED, 90.0, 2.0);
-
-        if (TeamElementPosition == 2) {
-            StrafeRight(DRIVE_SPEED, 36.0, 90.0);
-            driveStraight(DRIVE_SPEED, 7.5, 90.0);
+            StrafeRight(DRIVE_SPEED, 20.0, 90.0);
+            driveStraight(DRIVE_SPEED, 8.5, 90.0);
             waittimer(.5);
         }
-        else if (TeamElementPosition == 3) {
-            StrafeRight(DRIVE_SPEED, 42.0, 90.0);
-            driveStraight(DRIVE_SPEED, 7.5, 90.0);
-            waittimer(.5);
-        }
-        else {
-            StrafeRight(DRIVE_SPEED, 24.0, 90.0);
-            driveStraight(DRIVE_SPEED, 7.5, 90.0);
-            waittimer(.5);
-        }
-
         Bucket.setPosition(.3);
         Wrist.setPosition(.7);
-        waittimer(1);
+        waittimer(2);
         Wrist.setPosition(0.8);
         Bucket.setPosition(.7);
         waittimer(1);
         Bucket.setPosition(0);
         Wrist.setPosition(0);
-        waittimer(.5);
+
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
@@ -910,7 +903,7 @@ public class LeftAutoBackstage extends LinearOpMode {
             if (recognition.getLabel().equals("Blue_Bolt")) {
                 isPropDetected = true;
                 telemetry.addData("Object Detected", "Bolt Prop");
-                if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
+                if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 150) {
                     TeamElementPosition = 2;
                     telemetry.addData("Spike Position", "Spike 2");
                 } else {

@@ -88,7 +88,7 @@ import java.util.concurrent.TimeUnit;
 //@Disabled
 public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = 1; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = .25; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -124,6 +124,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
     double intakePwr = 1; // sets the pwr to things
+    double intakeup = 1; // the intake is up
 
 
 
@@ -183,7 +184,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
-        imu.resetYaw();
+
 
         // Initialize the Apriltag Detection process
         initAprilTag();
@@ -231,7 +232,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeIsActive())
         {
-            IntakeLinkage.setPosition(0.8);
+
             targetFound = false;
             desiredTag  = null;
 
@@ -275,30 +276,21 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  Bucket.setPosition(0.05);
                  Wrist.setPosition(0.0);
              }
-             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.3 && Wrist.getPosition() > .5 && SlideLeft.getCurrentPosition() <= -200) {
+             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.3 && Wrist.getPosition() > .5) {
                  Wrist.setPosition(0.8);
                  Bucket.setPosition(.7);
              }
-             else if (gamepad2.a) {
-                 Hanger.setPosition(0);
+             if (gamepad2.x && SlideLeft.getCurrentPosition() <= -200) {
+                 Wrist.setPosition(0.7);
+                 Bucket.setPosition(0.3);
+                 intakeup = intakeup*-1;
              }
-             if (gamepad2.x) {
-                 Hanger.setPosition(0.3);
+             if (intakeup < 0){
+                 IntakeLinkage.setPosition(0.0);
              }
-             if (gamepad2.dpad_down) {
-                 Winch.setPower(1);
-                 sleep(500);
-             }
-            if (gamepad2.dpad_up) {
-                Winch.setPower(-1);
-                sleep(500);
-            }
              else {
-                 Winch.setPower(0.0);
+                 IntakeLinkage.setPosition(0.8);
              }
-
-
-
 
              telemetry.addData("Servo Position", Hanger.getPosition());
              telemetry.update();

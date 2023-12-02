@@ -217,7 +217,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         rightBackDrive = hardwareMap.get(DcMotor.class, "Back_Right");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
-        IntakeLinkage = hardwareMap.get(Servo.class, "Intake Linkage");
+        IntakeLinkage = hardwareMap.get(Servo.class, "IntakeLinkage");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
