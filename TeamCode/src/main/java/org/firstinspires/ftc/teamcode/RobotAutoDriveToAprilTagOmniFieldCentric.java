@@ -29,10 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
@@ -41,6 +43,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -88,7 +91,7 @@ import java.util.concurrent.TimeUnit;
 //@Disabled
 public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     // Adjust these numbers to suit your robot.
-    final double DESIRED_DISTANCE = .25; //  this is how close the camera should get to the target (inches)
+    final double DESIRED_DISTANCE = 1; //  this is how close the camera should get to the target (inches)
 
     //  Set the GAIN constants to control the relationship between the measured position error, and how much power is
     //  applied to the drive motors to correct the error.
@@ -113,6 +116,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private Servo Bucket =null; //Bucket Servo
     private Servo Hanger = null; //Hanger Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
+    private DistanceSensor LeftDistance;
+    private DistanceSensor RightDistance;
+    double avgdist = 0;
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
@@ -123,8 +129,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int blueTeam = 1;
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
-    double intakePwr = 1; // sets the pwr to things
+    double intakePwr = 1; // sets the pwr to intake
     double intakeup = 1; // the intake is up
+    double boost = .45;
+    boolean wristToggle = false;
+    boolean intakeToggle = false;
 
 
 
@@ -135,6 +144,13 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         double  strafe          = 0;        // Desired strafe power/speed (-1 to +1)
         double  turn            = 0;        // Desired turning power/speed (-1 to +1)
 
+        // By setting these values to new Gamepad(), they will default to all
+        // boolean values as false and all float values as 0
+        Gamepad currentGamepad1 = new Gamepad();
+        Gamepad currentGamepad2 = new Gamepad();
+
+        Gamepad previousGamepad1 = new Gamepad();
+        Gamepad previousGamepad2 = new Gamepad();
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -152,6 +168,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         Hanger = hardwareMap.get(Servo.class,"Hanger");
         IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
+        LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
+        RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
+
+        Rev2mDistanceSensor sensorTimeOfFlightLeft = (Rev2mDistanceSensor) LeftDistance;
+        Rev2mDistanceSensor sensorTimeOfFlightRight = (Rev2mDistanceSensor) RightDistance;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -207,6 +228,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             Hanger.setPosition(0.0);
             IntakeLinkage.setPosition(0.0);
             telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
+
             if (gamepad1.x) {
                 blueTeam = 1;
                 redTeam = 0;
@@ -232,19 +254,46 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeIsActive())
         {
+            avgdist = (RightDistance.getDistance(DistanceUnit.INCH) + LeftDistance.getDistance(DistanceUnit.INCH))/2;
+            telemetry.addData("deviceName", LeftDistance.getDeviceName() );
+            //telemetry.addData("range", String.format("%.01f mm", LeftDistance.getDistance(DistanceUnit.MM)));
+            telemetry.addData("rangeleft", String.format("%.01f cm", LeftDistance.getDistance(DistanceUnit.CM)));
+            //telemetry.addData("range", String.format("%.01f m", LeftDistance.getDistance(DistanceUnit.METER)));
+            telemetry.addData("rangeleft", String.format("%.01f in", LeftDistance.getDistance(DistanceUnit.INCH)));
+
+            // Rev2mDistanceSensor specific methods.
+            telemetry.addData("ID", String.format("%x", sensorTimeOfFlightRight.getModelID()));
+            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
+
+            telemetry.addData("deviceName", RightDistance.getDeviceName() );
+            //telemetry.addData("range", String.format("%.01f mm", RightDistance.getDistance(DistanceUnit.MM)));
+            telemetry.addData("rangeright", String.format("%.01f cm", RightDistance.getDistance(DistanceUnit.CM)));
+            //telemetry.addData("range", String.format("%.01f m", RightDistance.getDistance(DistanceUnit.METER)));
+            telemetry.addData("rangeright", String.format("%.01f in", RightDistance.getDistance(DistanceUnit.INCH)));
+
+            // Rev2mDistanceSensor specific methods.
+            telemetry.addData("ID", String.format("%x", sensorTimeOfFlightRight.getModelID()));
+            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
+            telemetry.update();
+
+            previousGamepad1.copy(currentGamepad1);
+            previousGamepad2.copy(currentGamepad2);
+
+            currentGamepad1.copy(gamepad1);
+            currentGamepad2.copy(gamepad2);
 
             targetFound = false;
             desiredTag  = null;
-
+            if (gamepad1.b) {
+                boost = 0.75;
+            }
+            else {
+                boost = 0.45;
+            }
             if (gamepad1.x) {
-                intakeOn = 1; // turns intake on
                 intDirection = 1;   // Goes Into Robot
             }
-            if (gamepad1.a) {
-                intakeOn = -1; // intake off
-            }
-            else if (gamepad1.b) {
-                intakeOn = 1; // turns intake on
+            else if (gamepad1.a) {
                 intDirection = -1;   // Goes Out of Robot
             }
             if (intakeOn == 1) {
@@ -255,34 +304,66 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             }
             //Right Bumper will go to second desired tag below. (Make sure to set desired tag to -1 above)
             //
-            if (gamepad1.left_bumper && redTeam == 1) {
+            if (gamepad1.right_bumper && gamepad1.left_bumper && redTeam == 1) {
                 DESIRED_TAG_ID = 5;
+                boost = 1;
             }
-            else if (gamepad1.right_bumper && redTeam == 1) {
-                DESIRED_TAG_ID = 9;
+            else if (gamepad1.left_bumper && !gamepad1.right_bumper && redTeam == 1) {
+                DESIRED_TAG_ID = 4;
+                boost = 1;
             }
-             if (gamepad1.left_bumper && blueTeam == 1){
+            else if (gamepad1.right_bumper && !gamepad1.left_bumper && redTeam == 1) {
+                DESIRED_TAG_ID = 6;
+                boost = 1;
+            }
+
+            if (gamepad1.right_bumper && gamepad1.left_bumper && blueTeam == 1) {
                 DESIRED_TAG_ID = 2;
+                boost = 1;
             }
-             else if (gamepad1.right_bumper && blueTeam == 1){
-                DESIRED_TAG_ID = 8;
+             else if (gamepad1.left_bumper && !gamepad1.right_bumper && blueTeam == 1){
+                DESIRED_TAG_ID = 1;
+                boost = 1;
             }
+             else if (gamepad1.right_bumper && !gamepad1.left_bumper && blueTeam == 1){
+                DESIRED_TAG_ID = 3;
+                boost = 1;
+            }
+
 
              else if (gamepad2.y && Wrist.getPosition()<.3 && SlideLeft.getCurrentPosition() <= -200) {
                 Wrist.setPosition(.7);
                 Bucket.setPosition(0.3);
+
             }
-             else if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
+                // Rising edge detector
+            if (currentGamepad1.x && !previousGamepad1.x) {
+                // This toggles the intake between on sucking in and being off
+                intakeToggle = !intakeToggle;
+            }
+            if (currentGamepad1.a && !previousGamepad1.a) {
+                // This toggles the intake between on spitting out and being off
+                intakeToggle = !intakeToggle;
+            }
+            // Using the toggle variable to control the robot.
+
+            if (intakeToggle) {
+                intakeOn = 1;
+            }
+            else {
+                intakeOn = -1;
+            }
+
+            if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(0.05);
                  Wrist.setPosition(0.0);
              }
-             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.3 && Wrist.getPosition() > .5) {
+             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.4) {
                  Wrist.setPosition(0.8);
-                 Bucket.setPosition(.7);
+                 Bucket.setPosition(0.7);
              }
              if (gamepad2.x && SlideLeft.getCurrentPosition() <= -200) {
-                 Wrist.setPosition(0.7);
-                 Bucket.setPosition(0.3);
+
                  intakeup = intakeup*-1;
              }
              if (intakeup < 0){
@@ -290,6 +371,16 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
              }
              else {
                  IntakeLinkage.setPosition(0.8);
+             }
+             if (avgdist <= .5){
+                 telemetry.addLine("UNDER 1 INCHES");
+                 boost = .15;
+             }
+             else {
+                 boost = .45;
+             }
+             while (gamepad1.dpad_up & avgdist > 2) {
+                 moveRobot2AprilTag(avgdist, 0,0);
              }
 
              telemetry.addData("Servo Position", Hanger.getPosition());
@@ -323,6 +414,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Wrist Position", Wrist.getPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Servo Position", Hanger.getPosition());
+
                 telemetry.update();
 
             }
@@ -334,11 +426,13 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
+                telemetry.addData("Distance to Board", (String.format("%.01f cm", (LeftDistance.getDistance(DistanceUnit.CM) + (RightDistance.getDistance(DistanceUnit.CM)))/2)));
                 telemetry.update();
             }
 
             // If Left Bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
-            if (gamepad1.left_bumper && targetFound) {
+            if (gamepad1.right_bumper && gamepad1.left_bumper && targetFound)
+            {
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
@@ -353,7 +447,22 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
                 moveRobot2AprilTag(drive, strafe, turn);
             }
-            else if (gamepad1.right_bumper && targetFound) {
+            else if (gamepad1.left_bumper && !gamepad1.right_bumper && targetFound) {
+
+                // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+                double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
+                double  headingError    = desiredTag.ftcPose.bearing;
+                double  yawError        = desiredTag.ftcPose.yaw;
+
+                // Use the speed and turn "gains" to calculate how we want the robot to move.
+                drive  = Range.clip(rangeError * SPEED_GAIN, -MAX_AUTO_SPEED, MAX_AUTO_SPEED);
+                turn   = Range.clip(headingError * TURN_GAIN, -MAX_AUTO_TURN, MAX_AUTO_TURN) ;
+                strafe = Range.clip(-yawError * STRAFE_GAIN, -MAX_AUTO_STRAFE, MAX_AUTO_STRAFE);
+
+                telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
+                moveRobot2AprilTag(drive, strafe, turn);
+            }
+            else if (gamepad1.right_bumper && !gamepad1.left_bumper && targetFound) {
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
@@ -417,7 +526,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             }
             telemetry.update();
         }
-    }
+}
+
 
     /**
      * Move robot according to desired axes motions
@@ -448,10 +558,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         }
 
         // Send powers to the wheels.
-        Front_Left.setPower(leftFrontPower*.75);
-        Front_Right.setPower(rightFrontPower*.75);
-        Back_Left.setPower(leftBackPower*.75);
-        Back_Right.setPower(rightBackPower*.75);
+
+        Front_Left.setPower(leftFrontPower*boost);
+        Front_Right.setPower(rightFrontPower*boost);
+        Back_Left.setPower(leftBackPower*boost);
+        Back_Right.setPower(rightBackPower*boost);
     }
 
     /**

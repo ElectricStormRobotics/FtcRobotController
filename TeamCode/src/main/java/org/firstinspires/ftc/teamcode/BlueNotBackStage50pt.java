@@ -101,9 +101,9 @@ import java.util.concurrent.TimeUnit;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name="BlueAuton NBS Yellow Pix", group="Robot", preselectTeleOp = "Omni Drive To AprilTag Field Centric")
+@Autonomous(name="BlueAutonNBS 50 pt", group="Robot", preselectTeleOp = "Omni Drive To AprilTag Field Centric")
 //@Disabled
-public class BlueNotBackStageAprilTag extends LinearOpMode {
+public class BlueNotBackStage50pt extends LinearOpMode {
     /* Vision Variables */
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     private TfodProcessor tfod;
@@ -187,7 +187,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
     final double STRAFE_GAIN =  0.015 ;   //  Strafe Speed Control "Gain".  eg: Ramp up to 25% power at a 25 degree Yaw error.   (0.25 / 25.0)
     final double TURN_GAIN   =  0.01  ;   //  Turn Control "Gain".  eg: Ramp up to 25% power at a 25 degree error. (0.25 / 25.0)
 
-    final double MAX_AUTO_SPEED = 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
+    final double MAX_AUTO_SPEED = 0.75;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_STRAFE= 0.5;   //  Clip the approach speed to this max value (adjust for your robot)
     final double MAX_AUTO_TURN  = 0.3;   //  Clip the turn speed to this max value (adjust for your robot)
     final double DESIRED_DISTANCE = 10; //  this is how close the camera should get to the target (inches)
@@ -289,57 +289,84 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
         IntakeLinkage.setPosition(0.0);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
+            driveStraight(DRIVE_SPEED, -5.0, 0.0);
+
+            StrafeRight(DRIVE_SPEED, 20.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 0.5);
+
+            driveStraight(DRIVE_SPEED, 31.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 0.5);
+
+            turnToHeading(TURN_SPEED, 90.0 );
+            driveStraight(DRIVE_SPEED, 109.0, 90.0);
+
+            StrafeLeft(DRIVE_SPEED, 32.0, 90.0);
+
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            driveStraight(DRIVE_SPEED, 7.0, 90.0);
         }
         else if (TeamElementPosition == 3) {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
             driveStraight(DRIVE_SPEED, 20, -25.0);
+
             turnToHeading( TURN_SPEED, -25.0);
-            waittimer(.5);
+            waittimer(.125);
 
+            driveStraight(DRIVE_SPEED, -15, 0.0);
+            turnToHeading( TURN_SPEED, 0.0);
+            waittimer(.125);
+            StrafeRight(DRIVE_SPEED, 20.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 0.5);
+
+            driveStraight(DRIVE_SPEED, 44.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 0.5);
+
+            turnToHeading(TURN_SPEED, 90.0 );
+            driveStraight(DRIVE_SPEED, 109.0, 90.0);
+
+            StrafeLeft(DRIVE_SPEED, 20.0, 90.0);
+
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            driveStraight(DRIVE_SPEED, 7.0, 90.0);
         }
         else {
-
-            driveStraight(DRIVE_SPEED, 35.0,40.0);
+            driveStraight(DRIVE_SPEED, 5.0, 0.0);
+            driveStraight(DRIVE_SPEED, 30.0,40.0);
             turnToHeading( TURN_SPEED, 40.0);
-            waittimer(.5);
 
-        }
-
-        if (TeamElementPosition == 2) {
-            driveStraight(DRIVE_SPEED, -23.0, 0.0);
-        }
-        else if (TeamElementPosition == 3) {
-            driveStraight(DRIVE_SPEED, -20, 0.0);
+            waittimer(.125);
+            driveStraight(DRIVE_SPEED, -20.0,0.0);
             turnToHeading( TURN_SPEED, 0.0);
-            waittimer(.5);
+            waittimer(.125);
 
+            StrafeRight(DRIVE_SPEED, 20.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 0.5);
+
+            driveStraight(DRIVE_SPEED, 37.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 0.5);
+
+
+            turnToHeading(TURN_SPEED, 90.0 );
+            driveStraight(DRIVE_SPEED, 108.0, 90.0);
+
+            StrafeLeft(DRIVE_SPEED, 34.0, 90.0);
+
+            leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            driveStraight(DRIVE_SPEED, 2.0, 90.0);
         }
-        else {
-
-            driveStraight(DRIVE_SPEED, -35.0,0.0);
-            turnToHeading( TURN_SPEED, 0.0);
-            waittimer(.5);
-
-        }
-
-        StrafeRight(DRIVE_SPEED, 20.0, 0.0);
-        holdHeading(TURN_SPEED, 0.0, 0.5);
 
 
 
-
-        driveStraight(DRIVE_SPEED, 49.0, 0.0);
-        holdHeading(TURN_SPEED, 0.0, 0.5);
-
-
-
-        turnToHeading(TURN_SPEED, 90.0 );
-        driveStraight(DRIVE_SPEED, 96.0, 90.0);
-
-        holdHeading(TURN_SPEED, 165.0, 0.5);
-        telemetry.addLine("Hello World");
-
-
+        /*
         while (holdtimer.time() < 25 && rangeError > 2.7) {
 
             targetFound = false;
@@ -378,7 +405,7 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
 
                 telemetry.addData("Auto", "Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
                 moveRobot2AprilTag(drive, strafe, turn);
-                    /*
+
                     currentDetections = aprilTag.getDetections();
                     for (AprilTagDetection detection : currentDetections) {
                         if ((detection.metadata != null) &&
@@ -399,8 +426,10 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                     headingError = desiredTag.ftcPose.bearing;
                     yawError = desiredTag.ftcPose.yaw;
                 }
+
+
                moveRobot(0,0);
-                     */
+
             }
             else {
                 telemetry.addData("RANGE ERROR", rangeError);
@@ -413,23 +442,19 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             telemetry.addData("OUTATIME", "NO MAS TIEMPO");
             telemetry.update();
         }
-        leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        turnToHeading(TURN_SPEED, 90.0);
+        */
 
-        driveStraight(DRIVE_SPEED, 9.0, 90.0);
+
 
         Bucket.setPosition(.3);
         Wrist.setPosition(.7);
-        waittimer(1);
-        Wrist.setPosition(0.8);
+        waittimer(2);
+        Wrist.setPosition(0.9);
         Bucket.setPosition(.7);
         waittimer(1);
         Bucket.setPosition(0);
         Wrist.setPosition(0);
-        waittimer(.5);
+
 
      /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
@@ -545,29 +570,28 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            waittimer(.2);
         }
     }
 
     public void StrafeLeft(double maxDriveSpeed,
-                              double distance,
-                              double heading) {
+                           double distance,
+                           double heading) {
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int)(distance * COUNTS_PER_INCH);
-            leftTarget = leftFrontDrive.getCurrentPosition() + moveCounts;
-            rightTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
-            //leftTarget = leftBackDrive.getCurrentPosition() + moveCounts;
-            //rightTarget = rightBackDrive.getCurrentPosition() - moveCounts;
+            leftfrontTarget = leftFrontDrive.getCurrentPosition() - moveCounts;
+            rightfrontTarget = rightFrontDrive.getCurrentPosition() + moveCounts;
+            leftbackTarget = leftBackDrive.getCurrentPosition() + moveCounts;
+            rightbackTarget = rightBackDrive.getCurrentPosition() - moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(-leftTarget);
-            rightFrontDrive.setTargetPosition(rightTarget);
-            leftBackDrive.setTargetPosition(leftTarget);
-            rightBackDrive.setTargetPosition(-rightTarget);
+            leftFrontDrive.setTargetPosition(leftfrontTarget);
+            rightFrontDrive.setTargetPosition(rightfrontTarget);
+            leftBackDrive.setTargetPosition(leftbackTarget);
+            rightBackDrive.setTargetPosition(rightbackTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -576,11 +600,11 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
             // Set the required driving speed  (must be positive for RUN_TO_POSITION)
             // Start driving straight, and then enter the control loop
             maxDriveSpeed = Math.abs(maxDriveSpeed);
-            moveRobot(maxDriveSpeed, 0);
+            moveRobotStrafe(maxDriveSpeed, 0);
 
             // keep looping while we are still active, and ALL motors are running.
             while (opModeIsActive() &&
-                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy())) {
+                    (leftFrontDrive.isBusy() && rightFrontDrive.isBusy() && leftBackDrive.isBusy() && rightBackDrive.isBusy())) {
 
                 // Determine required steering to keep on heading
                 turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
@@ -590,18 +614,19 @@ public class BlueNotBackStageAprilTag extends LinearOpMode {
                     turnSpeed *= -1.0;
 
                 // Apply the turning correction to the current driving speed.
-                moveRobot(driveSpeed, turnSpeed);
+                moveRobotStrafe(driveSpeed, -turnSpeed);
 
                 // Display drive status for the driver.
                 sendTelemetry(true);
             }
 
             // Stop all motion & Turn off RUN_TO_POSITION
-            moveRobot(0, 0);
+            moveRobotStrafe(0, 0);
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         }
     }
 
