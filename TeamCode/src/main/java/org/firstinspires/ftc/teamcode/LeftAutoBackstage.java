@@ -226,8 +226,8 @@ public class LeftAutoBackstage extends LinearOpMode {
         // Wait for the game to start (Display Gyro value while waiting)
         while (opModeInInit()) {
             myVisionPortal.setProcessorEnabled(tfod, true);
-            Bucket.setPosition(0.0);
-            Wrist.setPosition(0.0);
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
             IntakeLinkage.setPosition(0.0);
             telemetryTfod();
             telemetry.update();
@@ -248,7 +248,7 @@ public class LeftAutoBackstage extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
-        IntakeLinkage.setPosition(0.0);
+        IntakeLinkage.setPosition(0.2);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
             driveStraight(DRIVE_SPEED, -23.0, 0.0);
@@ -303,8 +303,8 @@ public class LeftAutoBackstage extends LinearOpMode {
         Wrist.setPosition(0.9);
         Bucket.setPosition(.7);
         waittimer(1);
-        Bucket.setPosition(0);
-        Wrist.setPosition(0);
+        Bucket.setPosition(0.05);
+        Wrist.setPosition(0.1);
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees

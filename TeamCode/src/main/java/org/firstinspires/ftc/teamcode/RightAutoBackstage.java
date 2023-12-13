@@ -228,8 +228,8 @@ public class RightAutoBackstage extends LinearOpMode {
         while (opModeInInit()) {
             myVisionPortal.setProcessorEnabled(tfod, true);
             telemetryTfod();
-            Bucket.setPosition(0.0);
-            Wrist.setPosition(0.0);
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
             IntakeLinkage.setPosition(0.0);
             telemetry.update();
             sleep(20);
@@ -250,7 +250,7 @@ public class RightAutoBackstage extends LinearOpMode {
 
         // if position == 2 pixel goes to center spike
 
-        IntakeLinkage.setPosition(0.0);
+        IntakeLinkage.setPosition(0.2);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
             driveStraight(DRIVE_SPEED, -23.0, 0.0);
@@ -259,13 +259,13 @@ public class RightAutoBackstage extends LinearOpMode {
             driveStraight(DRIVE_SPEED, 28.0, -90.0);
 
             StrafeLeft(DRIVE_SPEED, 28.0, -90.0);
-            driveStraight(DRIVE_SPEED, 11.5, -90.0);
+            driveStraight(0.15, 13, -90.0);
             waittimer(.5);
         }
 
         else if (TeamElementPosition == 3) {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
-            driveStraight(DRIVE_SPEED, 20, -25.0);
+            driveStraight(DRIVE_SPEED, 22.5, -25.0);
             turnToHeading( TURN_SPEED, -25.0);
             waittimer(.5);
             driveStraight(DRIVE_SPEED, -20, 0.0);
@@ -274,15 +274,16 @@ public class RightAutoBackstage extends LinearOpMode {
             turnToHeading(TURN_SPEED, -90.0);
             driveStraight(DRIVE_SPEED, 28.0, -90.0);
 
-            StrafeLeft(DRIVE_SPEED, 32.0, -90.0);
-            driveStraight(DRIVE_SPEED, 11.5, -90.0);
+            StrafeLeft(DRIVE_SPEED, 16.0, -90.0);
+            driveStraight(0.15, 11, -90.0);
             waittimer(.5);
 
         }
 
         else {
 
-            driveStraight(DRIVE_SPEED, 35.0,40.0);
+            driveStraight(DRIVE_SPEED, 5.0, 0.0);
+            driveStraight(DRIVE_SPEED, 32.0,40.0);
             turnToHeading( TURN_SPEED, 40.0);
             waittimer(.5);
             driveStraight(DRIVE_SPEED, -30.0,0.0);
@@ -291,8 +292,8 @@ public class RightAutoBackstage extends LinearOpMode {
             turnToHeading(TURN_SPEED, -90.0);
             driveStraight(DRIVE_SPEED, 28.0, -90.0);
             waittimer(.5);
-            StrafeLeft(DRIVE_SPEED, 21.0, -90.0);
-            driveStraight(DRIVE_SPEED, 11.5, -90.0);
+            StrafeLeft(DRIVE_SPEED, 33.5, -90.0);
+            driveStraight(0.15, 16.0, -90.0);
             waittimer(.5);
 
         }
@@ -300,11 +301,11 @@ public class RightAutoBackstage extends LinearOpMode {
         Bucket.setPosition(.3);
         Wrist.setPosition(.7);
         waittimer(2);
-        Wrist.setPosition(0.9);
+        Wrist.setPosition(.9);
         Bucket.setPosition(.7);
         waittimer(1);
-        Bucket.setPosition(0);
-        Wrist.setPosition(0);
+        Bucket.setPosition(0.05);
+        Wrist.setPosition(0.1);
 
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"

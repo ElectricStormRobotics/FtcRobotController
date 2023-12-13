@@ -258,8 +258,8 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             myVisionPortal.setProcessorEnabled(tfod, true);
             myVisionPortal.setProcessorEnabled(aprilTag, true);
             IntakeLinkage.setPosition(0.0);
-            Bucket.setPosition(0.0);
-            Wrist.setPosition(0.0);
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
             telemetryTfod();
             telemetry.update();
             sleep(20);
@@ -286,7 +286,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
 
         // if position == 2 pixel goes to center spike
-        IntakeLinkage.setPosition(0.0);
+        IntakeLinkage.setPosition(0.2);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
             driveStraight(DRIVE_SPEED, -5.0, 0.0);
@@ -306,7 +306,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(DRIVE_SPEED, 7.0, 90.0);
+            driveStraight(.15, 7.0, 90.0);
         }
         else if (TeamElementPosition == 3) {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
@@ -327,13 +327,13 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             turnToHeading(TURN_SPEED, 90.0 );
             driveStraight(DRIVE_SPEED, 109.0, 90.0);
 
-            StrafeLeft(DRIVE_SPEED, 20.0, 90.0);
+            StrafeLeft(DRIVE_SPEED, 26.0, 90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(DRIVE_SPEED, 7.0, 90.0);
+            driveStraight(.15, 8.0, 90.0);
         }
         else {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
@@ -348,20 +348,21 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             StrafeRight(DRIVE_SPEED, 20.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
-            driveStraight(DRIVE_SPEED, 37.0, 0.0);
+            driveStraight(DRIVE_SPEED, 40.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
 
             turnToHeading(TURN_SPEED, 90.0 );
             driveStraight(DRIVE_SPEED, 108.0, 90.0);
 
-            StrafeLeft(DRIVE_SPEED, 34.0, 90.0);
+            StrafeLeft(DRIVE_SPEED, 39.0, 90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(DRIVE_SPEED, 2.0, 90.0);
+            driveStraight(.15, 8.0, 90.0);
+
         }
 
 
@@ -449,11 +450,11 @@ public class BlueNotBackStage50pt extends LinearOpMode {
         Bucket.setPosition(.3);
         Wrist.setPosition(.7);
         waittimer(2);
-        Wrist.setPosition(0.9);
+        Wrist.setPosition(1);
         Bucket.setPosition(.7);
         waittimer(1);
-        Bucket.setPosition(0);
-        Wrist.setPosition(0);
+        Bucket.setPosition(0.05);
+        Wrist.setPosition(0.1);
 
 
      /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"

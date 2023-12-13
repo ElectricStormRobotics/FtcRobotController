@@ -146,11 +146,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         // By setting these values to new Gamepad(), they will default to all
         // boolean values as false and all float values as 0
-        Gamepad currentGamepad1 = new Gamepad();
-        Gamepad currentGamepad2 = new Gamepad();
 
-        Gamepad previousGamepad1 = new Gamepad();
-        Gamepad previousGamepad2 = new Gamepad();
 
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -222,9 +218,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         //If x or b is pressed team will be set to the corresponding color
 
         while (opModeInInit()) {
-
-            Bucket.setPosition(0.025);
-            Wrist.setPosition(0.0);
+            boost = .55;
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
             Hanger.setPosition(0.0);
             IntakeLinkage.setPosition(0.0);
             telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
@@ -276,24 +272,14 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
             telemetry.update();
 
-            previousGamepad1.copy(currentGamepad1);
-            previousGamepad2.copy(currentGamepad2);
-
-            currentGamepad1.copy(gamepad1);
-            currentGamepad2.copy(gamepad2);
 
             targetFound = false;
             desiredTag  = null;
-            if (gamepad1.b) {
-                boost = 0.75;
-            }
-            else {
-                boost = 0.45;
-            }
+
             if (gamepad1.x) {
                 intDirection = 1;   // Goes Into Robot
             }
-            else if (gamepad1.a) {
+            else if (gamepad1.b) {
                 intDirection = -1;   // Goes Out of Robot
             }
             if (intakeOn == 1) {
@@ -336,30 +322,20 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 Bucket.setPosition(0.3);
 
             }
-                // Rising edge detector
-            if (currentGamepad1.x && !previousGamepad1.x) {
-                // This toggles the intake between on sucking in and being off
-                intakeToggle = !intakeToggle;
-            }
-            if (currentGamepad1.a && !previousGamepad1.a) {
-                // This toggles the intake between on spitting out and being off
-                intakeToggle = !intakeToggle;
-            }
-            // Using the toggle variable to control the robot.
-
-            if (intakeToggle) {
-                intakeOn = 1;
-            }
-            else {
+             if (gamepad1.x || gamepad1.b)   {
+                 intakeOn = 1;
+             }
+            if (gamepad1.a) {
                 intakeOn = -1;
             }
 
+
             if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(0.05);
-                 Wrist.setPosition(0.0);
+                 Wrist.setPosition(0.1);
              }
-             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.4) {
-                 Wrist.setPosition(0.8);
+             else if (gamepad2.left_bumper && Bucket.getPosition() < 0.4 && Wrist.getPosition() > .6) {
+                 Wrist.setPosition(0.9);
                  Bucket.setPosition(0.7);
              }
              if (gamepad2.x && SlideLeft.getCurrentPosition() <= -200) {
@@ -377,7 +353,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  boost = .15;
              }
              else {
-                 boost = .45;
+                 boost = .55;
              }
              while (gamepad1.dpad_up & avgdist > 2) {
                  moveRobot2AprilTag(avgdist, 0,0);
@@ -433,7 +409,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             // If Left Bumper is being pressed, AND we have found the desired target, Drive to target Automatically .
             if (gamepad1.right_bumper && gamepad1.left_bumper && targetFound)
             {
-
+                boost = 1;
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double  headingError    = desiredTag.ftcPose.bearing;
@@ -450,6 +426,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             else if (gamepad1.left_bumper && !gamepad1.right_bumper && targetFound) {
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+                boost = 1;
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double  headingError    = desiredTag.ftcPose.bearing;
                 double  yawError        = desiredTag.ftcPose.yaw;
@@ -465,6 +442,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             else if (gamepad1.right_bumper && !gamepad1.left_bumper && targetFound) {
 
                 // Determine heading, range and Yaw (tag image rotation) error so we can use them to control the robot automatically.
+                boost = 1;
                 double  rangeError      = (desiredTag.ftcPose.range - DESIRED_DISTANCE);
                 double  headingError    = desiredTag.ftcPose.bearing;
                 double  yawError        = desiredTag.ftcPose.yaw;
@@ -479,7 +457,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             }
 
             else {
-                /**
+                boost = .55;                /**
                  * Move robot according to desired axes motions
                  * <p>
                  * Positive X is forward
