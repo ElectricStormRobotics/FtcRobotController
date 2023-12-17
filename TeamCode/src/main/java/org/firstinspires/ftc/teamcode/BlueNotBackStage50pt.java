@@ -108,8 +108,8 @@ public class BlueNotBackStage50pt extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     private TfodProcessor tfod;
     private static final String[] LABELS = {
-            "Blue_Bolt",
-            "Red_Bolt",
+            "Blue",
+            "Red",
     };
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -292,7 +292,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             driveStraight(DRIVE_SPEED, -5.0, 0.0);
 
             StrafeRight(DRIVE_SPEED, 20.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 0.5);
+            holdHeading(TURN_SPEED, 0.0, 4.5);
 
             driveStraight(DRIVE_SPEED, 31.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
@@ -319,7 +319,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             turnToHeading( TURN_SPEED, 0.0);
             waittimer(.125);
             StrafeRight(DRIVE_SPEED, 20.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 0.5);
+            holdHeading(TURN_SPEED, 0.0, 4.5);
 
             driveStraight(DRIVE_SPEED, 44.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
@@ -346,7 +346,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             waittimer(.125);
 
             StrafeRight(DRIVE_SPEED, 20.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 0.5);
+            holdHeading(TURN_SPEED, 0.0, 3.5);
 
             driveStraight(DRIVE_SPEED, 40.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
@@ -572,6 +572,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
+
     }
 
     public void StrafeLeft(double maxDriveSpeed,
@@ -629,6 +630,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         }
+
     }
 
     public void moveRobot2AprilTag(double x, double y, double yaw) {
@@ -990,7 +992,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
         tfod = new TfodProcessor.Builder()
                 // Use setModelAssetName() if the TF Model is built in as an asset.
                 // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
-                .setModelAssetName("Prop_Model.tflite")
+                .setModelAssetName("Correct_1.tflite")
                 //.setModelFileName("Prop_Model")
 
                 .setModelLabels(LABELS)
@@ -1138,9 +1140,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             telemetry.addData("- Position", "%.0f / %.0f", x, y);
             telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
             telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
-            if (recognition.getLabel().equals("Blue_Bolt")) {
+            if (recognition.getLabel().equals("Blue")) {
                 isPropDetected = true;
-                telemetry.addData("Object Detected", "Bolt Prop");
+                telemetry.addData("Object Detected", "Prop");
                 if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 300) {
                     TeamElementPosition = 3;
                     DESIRED_TAG_ID = 3;

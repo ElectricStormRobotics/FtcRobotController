@@ -113,8 +113,8 @@ public class RightAutoBackstage extends LinearOpMode {
     private TfodProcessor tfod;
 
     private static final String[] LABELS = {
-            "Blue_Bolt",
-            "Red_Bolt",
+            "Blue",
+            "Red",
     };
 
     private boolean isPropDetected = false;
@@ -839,7 +839,7 @@ public class RightAutoBackstage extends LinearOpMode {
         tfod = new TfodProcessor.Builder()
                 // Use setModelAssetName() if the TF Model is built in as an asset.
                 // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
-                .setModelAssetName("Prop_Model.tflite")
+                .setModelAssetName("Correct_1.tflite")
                 //.setModelFileName("Prop_Model")
 
                 .setModelLabels(LABELS)
@@ -902,9 +902,9 @@ public class RightAutoBackstage extends LinearOpMode {
             telemetry.addData("- Position", "%.0f / %.0f", x, y);
             telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
             telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
-            if (recognition.getLabel().equals("Red_Bolt")) {
+            if (recognition.getLabel().equals("Red")) {
                 isPropDetected = true;
-                telemetry.addData("Object Detected", "Bolt Prop");
+                telemetry.addData("Object Detected", "Prop");
                 if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 200) {
                     TeamElementPosition = 3;
                     telemetry.addData("Spike Position", "Spike 3");

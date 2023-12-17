@@ -108,8 +108,8 @@ public class RedNotBackStage50pt extends LinearOpMode {
     private static final boolean USE_WEBCAM = true;  // true for webcam, false for phone camera
     private TfodProcessor tfod;
     private static final String[] LABELS = {
-            "Blue_Bolt",
-            "Red_Bolt",
+            "Blue",
+            "Red",
     };
     /**
      * The variable to store our instance of the AprilTag processor.
@@ -263,7 +263,6 @@ public class RedNotBackStage50pt extends LinearOpMode {
             telemetryTfod();
             telemetry.update();
             sleep(20);
-
         }
         ElapsedTime holdtimer = new ElapsedTime();
         holdtimer.reset();
@@ -288,11 +287,13 @@ public class RedNotBackStage50pt extends LinearOpMode {
         // if position == 2 pixel goes to center spike
         IntakeLinkage.setPosition(0.2);
         if (TeamElementPosition == 2) {
+
+            //MIDDLE
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
             driveStraight(DRIVE_SPEED, -5.0, 0.0);
 
             StrafeLeft(DRIVE_SPEED, 20.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 0.5);
+            holdHeading(TURN_SPEED, 0.0, 4);
 
             driveStraight(DRIVE_SPEED, 31.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
@@ -309,7 +310,10 @@ public class RedNotBackStage50pt extends LinearOpMode {
             driveStraight(.15, 7.0, -90.0);
         }
         else if (TeamElementPosition == 3) {
-            driveStraight(DRIVE_SPEED, 33.0, -40.0);
+
+            //RIGHT
+            driveStraight(DRIVE_SPEED, 5.0, 0.0);
+            driveStraight(DRIVE_SPEED, 28.0, -40.0);
             turnToHeading( TURN_SPEED, -40.0);
             waittimer(.125);
 
@@ -319,14 +323,14 @@ public class RedNotBackStage50pt extends LinearOpMode {
             StrafeLeft(DRIVE_SPEED, 20.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
-            driveStraight(DRIVE_SPEED, 44.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 0.5);
+            driveStraight(DRIVE_SPEED, 40.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 3.5);
 
             turnToHeading(TURN_SPEED, -90.0 );
-            driveStraight(DRIVE_SPEED, 109.0, -90.0);
+            driveStraight(DRIVE_SPEED, 100.0, -90.0);
 
 
-            StrafeRight(DRIVE_SPEED, 34.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 38.0, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -336,6 +340,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
         }
         else {
 
+            //LEFT
             driveStraight(DRIVE_SPEED, 5.0,25.0);
             driveStraight(DRIVE_SPEED, 20.0, 25.0);
             turnToHeading( TURN_SPEED, 25.0);
@@ -345,17 +350,16 @@ public class RedNotBackStage50pt extends LinearOpMode {
             turnToHeading( TURN_SPEED, 0.0);
             waittimer(.125);
 
-            StrafeLeft(DRIVE_SPEED, 15.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 0.5);
+            StrafeLeft(DRIVE_SPEED, 17.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 4.5);
 
-            driveStraight(DRIVE_SPEED, 43.0, 0.0);
+            driveStraight(DRIVE_SPEED, 46.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
-
 
             turnToHeading(TURN_SPEED, -90.0 );
             driveStraight(DRIVE_SPEED, 108.0, -90.0);
 
-            StrafeRight(DRIVE_SPEED, 20.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 24.0, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -363,7 +367,6 @@ public class RedNotBackStage50pt extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             driveStraight(.15, 13.0, -90.0);
         }
-
 
 
         /*
@@ -456,7 +459,8 @@ public class RedNotBackStage50pt extends LinearOpMode {
         Wrist.setPosition(0.1);
 
 
-     /*   driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
+     /*
+      driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
         holdHeading( TURN_SPEED, -45.0, 0.5);   // Hold -45 Deg heading for a 1/2 second
 
@@ -989,7 +993,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
         tfod = new TfodProcessor.Builder()
                 // Use setModelAssetName() if the TF Model is built in as an asset.
                 // Use setModelFileName() if you have downloaded a custom team model to the Robot Controller.
-                .setModelAssetName("Prop_Model.tflite")
+                .setModelAssetName("Correct_1.tflite")
                 //.setModelFileName("Prop_Model")
 
                 .setModelLabels(LABELS)
@@ -1137,9 +1141,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
             telemetry.addData("- Position", "%.0f / %.0f", x, y);
             telemetry.addData("- Size", "%.0f x %.0f", recognition.getWidth(), recognition.getHeight());
             telemetry.addData(">", "Robot Heading = %4.0f", getHeading());
-            if (recognition.getLabel().equals("Red_Bolt")) {
+            if (recognition.getLabel().equals("Red")) {
                 isPropDetected = true;
-                telemetry.addData("Object Detected", "Bolt Prop");
+                telemetry.addData("Object Detected", "Prop");
                 if (Double.parseDouble(JavaUtil.formatNumber(recognition.getLeft(), 0)) > 200) {
                     TeamElementPosition = 2;
                     telemetry.addData("Spike Position", "Spike 2");

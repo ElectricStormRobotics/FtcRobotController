@@ -37,6 +37,7 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
@@ -116,9 +117,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private Servo Bucket =null; //Bucket Servo
     private Servo Hanger = null; //Hanger Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
-    private DistanceSensor LeftDistance;
-    private DistanceSensor RightDistance;
-    double avgdist = 0;
+    //private DistanceSensor LeftDistance;
+    //private DistanceSensor RightDistance;
+    //double avgdist = 0;
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
@@ -164,11 +165,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         Hanger = hardwareMap.get(Servo.class,"Hanger");
         IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
-        LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
-        RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
+        //LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
+        //RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
 
-        Rev2mDistanceSensor sensorTimeOfFlightLeft = (Rev2mDistanceSensor) LeftDistance;
-        Rev2mDistanceSensor sensorTimeOfFlightRight = (Rev2mDistanceSensor) RightDistance;
+       // Rev2mDistanceSensor sensorTimeOfFlightLeft = (Rev2mDistanceSensor) LeftDistance;
+       // Rev2mDistanceSensor sensorTimeOfFlightRight = (Rev2mDistanceSensor) RightDistance;
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -250,27 +251,27 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeIsActive())
         {
-            avgdist = (RightDistance.getDistance(DistanceUnit.INCH) + LeftDistance.getDistance(DistanceUnit.INCH))/2;
-            telemetry.addData("deviceName", LeftDistance.getDeviceName() );
+            //avgdist = (RightDistance.getDistance(DistanceUnit.INCH) + LeftDistance.getDistance(DistanceUnit.INCH))/2;
+            //telemetry.addData("deviceName", LeftDistance.getDeviceName() );
             //telemetry.addData("range", String.format("%.01f mm", LeftDistance.getDistance(DistanceUnit.MM)));
-            telemetry.addData("rangeleft", String.format("%.01f cm", LeftDistance.getDistance(DistanceUnit.CM)));
+            //telemetry.addData("rangeleft", String.format("%.01f cm", LeftDistance.getDistance(DistanceUnit.CM)));
             //telemetry.addData("range", String.format("%.01f m", LeftDistance.getDistance(DistanceUnit.METER)));
-            telemetry.addData("rangeleft", String.format("%.01f in", LeftDistance.getDistance(DistanceUnit.INCH)));
+            //telemetry.addData("rangeleft", String.format("%.01f in", LeftDistance.getDistance(DistanceUnit.INCH)));
 
             // Rev2mDistanceSensor specific methods.
-            telemetry.addData("ID", String.format("%x", sensorTimeOfFlightRight.getModelID()));
-            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
+            //telemetry.addData("ID", String.format("%x", sensorTimeOfFlightRight.getModelID()));
+            //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
 
-            telemetry.addData("deviceName", RightDistance.getDeviceName() );
+            //telemetry.addData("deviceName", RightDistance.getDeviceName() );
             //telemetry.addData("range", String.format("%.01f mm", RightDistance.getDistance(DistanceUnit.MM)));
-            telemetry.addData("rangeright", String.format("%.01f cm", RightDistance.getDistance(DistanceUnit.CM)));
+            //telemetry.addData("rangeright", String.format("%.01f cm", RightDistance.getDistance(DistanceUnit.CM)));
             //telemetry.addData("range", String.format("%.01f m", RightDistance.getDistance(DistanceUnit.METER)));
-            telemetry.addData("rangeright", String.format("%.01f in", RightDistance.getDistance(DistanceUnit.INCH)));
+            //telemetry.addData("rangeright", String.format("%.01f in", RightDistance.getDistance(DistanceUnit.INCH)));
 
             // Rev2mDistanceSensor specific methods.
-            telemetry.addData("ID", String.format("%x", sensorTimeOfFlightRight.getModelID()));
-            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
-            telemetry.update();
+            //telemetry.addData("ID", String.format("%x", sensorTimeOfFlightRight.getModelID()));
+            //telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlightRight.didTimeoutOccur()));
+            //telemetry.update();
 
 
             targetFound = false;
@@ -348,7 +349,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
              else {
                  IntakeLinkage.setPosition(0.8);
              }
-             if (avgdist <= .5){
+   /*          if (avgdist <= .5){
                  telemetry.addLine("UNDER 1 INCHES");
                  boost = .15;
              }
@@ -358,7 +359,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
              while (gamepad1.dpad_up & avgdist > 2) {
                  moveRobot2AprilTag(avgdist, 0,0);
              }
-
+*/
              telemetry.addData("Servo Position", Hanger.getPosition());
              telemetry.update();
 
@@ -402,7 +403,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
-                telemetry.addData("Distance to Board", (String.format("%.01f cm", (LeftDistance.getDistance(DistanceUnit.CM) + (RightDistance.getDistance(DistanceUnit.CM)))/2)));
+                //telemetry.addData("Distance to Board", (String.format("%.01f cm", (LeftDistance.getDistance(DistanceUnit.CM) + (RightDistance.getDistance(DistanceUnit.CM)))/2)));
                 telemetry.update();
             }
 
@@ -506,6 +507,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         }
 }
 
+    public void waittimer(double time) {
+        ElapsedTime holdTimer = new ElapsedTime();
+        holdTimer.reset();
+        }
+
 
     /**
      * Move robot according to desired axes motions
@@ -580,7 +586,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             telemetry.addData("Camera", "Waiting");
             telemetry.update();
             while (!isStopRequested() && (visionPortal.getCameraState() != VisionPortal.CameraState.STREAMING)) {
-                sleep(20);
+                waittimer(20);
             }
             telemetry.addData("Camera", "Ready");
             telemetry.update();
@@ -592,13 +598,13 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             ExposureControl exposureControl = visionPortal.getCameraControl(ExposureControl.class);
             if (exposureControl.getMode() != ExposureControl.Mode.Manual) {
                 exposureControl.setMode(ExposureControl.Mode.Manual);
-                sleep(50);
+                waittimer(50);
             }
             exposureControl.setExposure((long)exposureMS, TimeUnit.MILLISECONDS);
-            sleep(20);
+            waittimer(50);
             GainControl gainControl = visionPortal.getCameraControl(GainControl.class);
             gainControl.setGain(gain);
-            sleep(20);
+            waittimer(20);
         }
     }
 }
