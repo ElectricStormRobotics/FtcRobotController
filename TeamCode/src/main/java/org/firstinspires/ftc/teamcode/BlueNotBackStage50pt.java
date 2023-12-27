@@ -292,13 +292,13 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             driveStraight(DRIVE_SPEED, -5.0, 0.0);
 
             StrafeRight(DRIVE_SPEED, 20.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 4.5);
+            holdHeading(TURN_SPEED, 0.0, 7.5);
 
             driveStraight(DRIVE_SPEED, 31.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
             turnToHeading(TURN_SPEED, 90.0 );
-            driveStraight(DRIVE_SPEED, 109.0, 90.0);
+            driveStraight(DRIVE_SPEED, 97.0, 90.0);
 
             StrafeLeft(DRIVE_SPEED, 32.0, 90.0);
 
@@ -306,7 +306,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(.15, 7.0, 90.0);
+            driveStraight(.15, 19.0, 90.0);
         }
         else if (TeamElementPosition == 3) {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
@@ -325,7 +325,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
             turnToHeading(TURN_SPEED, 90.0 );
-            driveStraight(DRIVE_SPEED, 109.0, 90.0);
+            driveStraight(DRIVE_SPEED, 97.0, 90.0);
 
             StrafeLeft(DRIVE_SPEED, 26.0, 90.0);
 
@@ -333,7 +333,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(.15, 8.0, 90.0);
+            driveStraight(.15, 20.0, 90.0);
         }
         else {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
@@ -353,7 +353,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
 
 
             turnToHeading(TURN_SPEED, 90.0 );
-            driveStraight(DRIVE_SPEED, 108.0, 90.0);
+            driveStraight(DRIVE_SPEED, 97.0, 90.0);
 
             StrafeLeft(DRIVE_SPEED, 39.0, 90.0);
 
@@ -361,7 +361,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(.15, 8.0, 90.0);
+            driveStraight(.15, 20.0, 90.0);
 
         }
 
@@ -492,7 +492,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
-        sleep(2000);  // Pause to display last telemetry message.
+        waittimer(2.0);  // Pause to display last telemetry message.
 
 
     }
@@ -572,6 +572,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
 
     }
 
@@ -629,6 +632,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        }
+        if (!opModeIsActive()) {
+            return;
         }
 
     }
@@ -713,6 +719,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void DiagonalRight (double maxDriveSpeed,
                               double distance,
@@ -767,6 +776,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     public void DiagonalLeft (double maxDriveSpeed,
@@ -823,6 +835,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     /**
      *  Spin on the central axis to point in a new direction.
@@ -857,6 +872,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
 
             // Display drive status for the driver.
             sendTelemetry(false);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
 
         // Stop all motion;
@@ -898,6 +916,9 @@ public class BlueNotBackStage50pt extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     // **********  LOW Level driving functions.  ********************
@@ -1067,7 +1088,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
         holdTimer.reset();
 
 
-        while (holdTimer.time() < time){
+        while (holdTimer.time() < time && opModeIsActive()){
 
         }
 

@@ -495,7 +495,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
-        sleep(2000);  // Pause to display last telemetry message.
+        waittimer(2.0);  // Pause to display last telemetry message.
 
 
     }
@@ -575,6 +575,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     public void StrafeLeft(double maxDriveSpeed,
@@ -631,6 +634,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
 
@@ -714,6 +720,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void DiagonalRight (double maxDriveSpeed,
                               double distance,
@@ -768,6 +777,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     public void DiagonalLeft (double maxDriveSpeed,
@@ -824,6 +836,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     /**
      *  Spin on the central axis to point in a new direction.
@@ -862,6 +877,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     /**
@@ -899,6 +917,9 @@ public class RedNotBackStage50pt extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     // **********  LOW Level driving functions.  ********************
@@ -1068,7 +1089,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
         holdTimer.reset();
 
 
-        while (holdTimer.time() < time){
+        while (holdTimer.time() < time && opModeIsActive()){
 
         }
 

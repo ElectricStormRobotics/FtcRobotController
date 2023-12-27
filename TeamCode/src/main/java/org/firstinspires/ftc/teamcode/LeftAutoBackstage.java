@@ -255,11 +255,24 @@ public class LeftAutoBackstage extends LinearOpMode {
 
             turnToHeading(TURN_SPEED, 90.0);
             driveStraight(DRIVE_SPEED, 31.0, 90.0);
-            holdHeading(TURN_SPEED, 90.0, 1.0);
+            holdHeading(TURN_SPEED, 90.0, .5);
 
             StrafeRight(DRIVE_SPEED, 27.0, 90.0);
             driveStraight(DRIVE_SPEED, 10.0, 90.0);
-            waittimer(.5);
+            waittimer(.25);
+
+            Bucket.setPosition(.3);
+            Wrist.setPosition(.7);
+            waittimer(1.5);
+            Wrist.setPosition(1.0);
+            Bucket.setPosition(.7);
+            waittimer(1);
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
+
+            driveStraight(DRIVE_SPEED, -2.0, 90.0);
+            StrafeLeft(DRIVE_SPEED, 28.0, 90.0);
+            driveStraight(DRIVE_SPEED, 10.0, 90.0);
         }
         else if (TeamElementPosition == 3) {
             driveStraight(DRIVE_SPEED, 33.0, -40.0);
@@ -274,9 +287,23 @@ public class LeftAutoBackstage extends LinearOpMode {
             driveStraight(DRIVE_SPEED, 31.0, 90.0);
             holdHeading(TURN_SPEED, 90.0, 1.0);
 
-            StrafeRight(DRIVE_SPEED, 33.0, 90.0);
+            StrafeRight(DRIVE_SPEED, 33.5, 90.0);
             driveStraight(DRIVE_SPEED, 12.0, 90.0);
             waittimer(.5);
+
+            Bucket.setPosition(.3);
+            Wrist.setPosition(.7);
+            waittimer(2);
+            Wrist.setPosition(1.0);
+            Bucket.setPosition(.7);
+            waittimer(1);
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
+
+            driveStraight(DRIVE_SPEED, -2.0, 90.0);
+
+            StrafeLeft(DRIVE_SPEED, 32.0, 90.0);
+            driveStraight(DRIVE_SPEED, 10.0, 90.0);
         }
         else {
 
@@ -296,15 +323,23 @@ public class LeftAutoBackstage extends LinearOpMode {
             StrafeRight(DRIVE_SPEED, 20.0, 90.0);
             driveStraight(DRIVE_SPEED, 8.5, 90.0);
             waittimer(.5);
+
+            Bucket.setPosition(.3);
+            Wrist.setPosition(.7);
+            waittimer(2);
+            Wrist.setPosition(1.0);
+            Bucket.setPosition(.7);
+            waittimer(1);
+            Bucket.setPosition(0.05);
+            Wrist.setPosition(0.1);
+
+            driveStraight(DRIVE_SPEED, -2.0, 90.0);
+
+            StrafeLeft(DRIVE_SPEED, 24.0, 90.0);
+
+            driveStraight(DRIVE_SPEED, 10.0, 90.0);
         }
-        Bucket.setPosition(.3);
-        Wrist.setPosition(.7);
-        waittimer(2);
-        Wrist.setPosition(0.9);
-        Bucket.setPosition(.7);
-        waittimer(1);
-        Bucket.setPosition(0.05);
-        Wrist.setPosition(0.1);
+
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
@@ -333,7 +368,7 @@ public class LeftAutoBackstage extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
-        sleep(2000);  // Pause to display last telemetry message.
+        waittimer(1.0);  // Pause to display last telemetry message.
 
 
     }
@@ -414,11 +449,14 @@ public class LeftAutoBackstage extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             waittimer(.2);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     public void StrafeLeft(double maxDriveSpeed,
-                              double distance,
-                              double heading) {
+                           double distance,
+                           double heading) {
 
         // Ensure that the opmode is still active
         if (opModeIsActive()) {
@@ -431,10 +469,10 @@ public class LeftAutoBackstage extends LinearOpMode {
             rightbackTarget = rightBackDrive.getCurrentPosition() - moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            leftFrontDrive.setTargetPosition(leftTarget);
-            rightFrontDrive.setTargetPosition(rightTarget);
-            leftBackDrive.setTargetPosition(leftTarget);
-            rightBackDrive.setTargetPosition(rightTarget);
+            leftFrontDrive.setTargetPosition(leftfrontTarget);
+            rightFrontDrive.setTargetPosition(rightfrontTarget);
+            leftBackDrive.setTargetPosition(leftbackTarget);
+            rightBackDrive.setTargetPosition(rightbackTarget);
 
             leftFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -457,7 +495,7 @@ public class LeftAutoBackstage extends LinearOpMode {
                     turnSpeed *= -1.0;
 
                 // Apply the turning correction to the current driving speed.
-                moveRobotStrafe(driveSpeed, turnSpeed);
+                moveRobotStrafe(driveSpeed, -turnSpeed);
 
                 // Display drive status for the driver.
                 sendTelemetry(true);
@@ -470,6 +508,9 @@ public class LeftAutoBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             waittimer(.2);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     public void driveStraight(double maxDriveSpeed,
@@ -526,6 +567,9 @@ public class LeftAutoBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void DiagonalRight (double maxDriveSpeed,
                               double distance,
@@ -580,6 +624,9 @@ public class LeftAutoBackstage extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     public void DiagonalLeft (double maxDriveSpeed,
@@ -636,6 +683,9 @@ public class LeftAutoBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     /**
      *  Spin on the central axis to point in a new direction.
@@ -674,6 +724,9 @@ public class LeftAutoBackstage extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     /**
@@ -711,6 +764,9 @@ public class LeftAutoBackstage extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     // **********  LOW Level driving functions.  ********************
@@ -787,7 +843,7 @@ public class LeftAutoBackstage extends LinearOpMode {
         holdTimer.reset();
 
 
-        while (holdTimer.time() < time){
+        while (holdTimer.time() < time && opModeIsActive()){
         sendTelemetry(true);
         }
 

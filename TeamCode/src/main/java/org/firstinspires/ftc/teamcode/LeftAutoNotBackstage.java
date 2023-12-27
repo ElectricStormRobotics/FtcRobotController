@@ -364,6 +364,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     public void StrafeLeft(double maxDriveSpeed,
@@ -420,6 +423,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void driveStraight(double maxDriveSpeed,
                               double distance,
@@ -474,6 +480,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     public void DiagonalRight (double maxDriveSpeed,
@@ -530,6 +539,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void DiagonalLeft (double maxDriveSpeed,
                                double distance,
@@ -585,6 +597,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     /**
      *  Spin on the central axis to point in a new direction.
@@ -623,6 +638,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     /**
@@ -660,6 +678,9 @@ public class LeftAutoNotBackstage extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     // **********  LOW Level driving functions.  ********************

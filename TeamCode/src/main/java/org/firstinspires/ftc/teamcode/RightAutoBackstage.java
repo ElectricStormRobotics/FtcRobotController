@@ -335,7 +335,7 @@ public class RightAutoBackstage extends LinearOpMode {
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
-        sleep(2000);  // Pause to display last telemetry message.
+        waittimer(2.0); // Pause to display last telemetry message.
 
 
     }
@@ -416,6 +416,9 @@ public class RightAutoBackstage extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             waittimer(.2);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     public void StrafeLeft(double maxDriveSpeed,
@@ -473,6 +476,9 @@ public class RightAutoBackstage extends LinearOpMode {
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             waittimer(.2);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void driveStraight(double maxDriveSpeed,
                               double distance,
@@ -527,6 +533,9 @@ public class RightAutoBackstage extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     public void DiagonalRight (double maxDriveSpeed,
@@ -583,6 +592,9 @@ public class RightAutoBackstage extends LinearOpMode {
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             //rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         }
+        if (!opModeIsActive()) {
+            return;
+        }
     }
     public void DiagonalLeft (double maxDriveSpeed,
                                double distance,
@@ -637,6 +649,9 @@ public class RightAutoBackstage extends LinearOpMode {
             rightFrontDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+        if (!opModeIsActive()) {
+            return;
         }
     }
     /**
@@ -713,6 +728,9 @@ public class RightAutoBackstage extends LinearOpMode {
 
         // Stop all motion;
         moveRobot(0, 0);
+        if (!opModeIsActive()) {
+            return;
+        }
     }
 
     // **********  LOW Level driving functions.  ********************
@@ -789,7 +807,7 @@ public class RightAutoBackstage extends LinearOpMode {
         holdTimer.reset();
 
 
-        while (holdTimer.time() < time){
+        while (holdTimer.time() < time && opModeIsActive()){
 
         }
 

@@ -29,13 +29,12 @@
 
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -44,13 +43,10 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDir
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.GainControl;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
-import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -88,9 +84,9 @@ import java.util.concurrent.TimeUnit;
  *
  */
 
-@TeleOp(name="Omni Drive To AprilTag Field Centric", group = "Concept")
+@TeleOp(name="Omni Drive To AprilTag Field Centric Lift", group = "Concept")
 //@Disabled
-public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
+public class RobotAutoDriveToAprilTagOmniFieldCentricLift extends LinearOpMode {
     // Adjust these numbers to suit your robot.
     final double DESIRED_DISTANCE = 1; //  this is how close the camera should get to the target (inches)
 
@@ -130,7 +126,6 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int blueTeam = 1;
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
-    double g = (.0001); // Slide is all the way down
     double intakePwr = 1; // sets the pwr to intake
     double intakeup = 1; // the intake is up
     double boost = .55;
@@ -189,9 +184,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         SlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        SlideLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         SlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        SlideRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        SlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -231,16 +226,18 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 blueTeam = 1;
                 redTeam = 0;
                 telemetry.addData("Red ", "Team");
+                telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
             } else if (gamepad1.b) {
                 redTeam = 1;
                 blueTeam = 0;
                 telemetry.addData("Blue ", "Team");
-
+                telemetry.addData("Servo Position", Hanger.getPosition());
                 telemetry.update();
             } else {
                 telemetry.addData("Red: ", redTeam);
                 telemetry.addData("Blue: ", blueTeam);
+                telemetry.addData("Servo Position", Hanger.getPosition());
 
                 telemetry.update();
             }
@@ -359,7 +356,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  moveRobot2AprilTag(avgdist, 0,0);
              }
 */
-
+             telemetry.addData("Servo Position", Hanger.getPosition());
              telemetry.update();
 
 
@@ -385,20 +382,18 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Range",  "%5.1f inches", desiredTag.ftcPose.range);
                 telemetry.addData("Bearing","%3.0f degrees", desiredTag.ftcPose.bearing);
                 telemetry.addData("Yaw","%3.0f degrees", desiredTag.ftcPose.yaw);
-                telemetry.addData("SlideLeft Position", SlideLeft.getCurrentPosition());
-                telemetry.addData("SlideRight Position", SlideRight.getCurrentPosition());
+                telemetry.addData("SlidePosL", SlideLeft.getCurrentPosition());
+                telemetry.addData("SlidePosR", SlideRight.getCurrentPosition());
                 telemetry.addData("Wrist Position", Wrist.getPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
-
                 telemetry.update();
 
             }
             else {
                 telemetry.addData(">","Drive using joysticks to find valid target\n");
-
-                telemetry.addData("SlideLeft Position", SlideLeft.getCurrentPosition());
-                telemetry.addData("SlideRight Position", SlideRight.getCurrentPosition());
                 telemetry.addData("Wrist Position", Wrist.getPosition());
+                telemetry.addData("SlidePosL", SlideLeft.getCurrentPosition());
+                telemetry.addData("SlidePosR", SlideRight.getCurrentPosition());
                 telemetry.addData("Bucket position", Bucket.getPosition());
                 telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
                 //telemetry.addData("Distance to Board", (String.format("%.01f cm", (LeftDistance.getDistance(DistanceUnit.CM) + (RightDistance.getDistance(DistanceUnit.CM)))/2)));
@@ -497,13 +492,41 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 Back_Left.setPower(backLeftPower);
                 Front_Right.setPower(frontRightPower);
                 Back_Right.setPower(backRightPower);
-                SlideLeft.setPower(gamepad2.left_stick_y+(g*SlideLeft.getCurrentPosition()));
-                SlideRight.setPower(gamepad2.left_stick_y+(g*SlideRight.getCurrentPosition()));
+            }
+                if (gamepad2.left_stick_y >= .2) {
+                    SlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    SlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    SlideLeft.setPower(gamepad2.left_stick_y);
+                    SlideRight.setPower(gamepad2.left_stick_y);
+                }
+                else if (gamepad2.left_stick_y < .2 && gamepad2.left_stick_y > -.2) {
+
+                    int SlidePosR = 0;
+                    int SlidePosL = 0;
+                    SlidePosR = SlideRight.getCurrentPosition();
+                    SlidePosL = SlideLeft.getCurrentPosition();
+                    SlideLeft.setTargetPosition(SlidePosL);
+                    SlideRight.setTargetPosition(SlidePosR);
+                    SlideRight.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    SlideLeft.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    SlideLeft.setPower(.15);
+                    SlideRight.setPower(.15);
+
+                }
+                else if (gamepad2.left_stick_y <= -.2) {
+                    SlideRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    SlideLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                    SlideLeft.setPower(gamepad2.left_stick_y);
+                    SlideRight.setPower(gamepad2.left_stick_y);
+                }
+
 
             }
+
             telemetry.update();
+
         }
-}
+
 
     public void waittimer(double time) {
         ElapsedTime holdTimer = new ElapsedTime();
