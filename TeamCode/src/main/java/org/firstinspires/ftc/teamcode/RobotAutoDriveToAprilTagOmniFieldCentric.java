@@ -121,6 +121,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     //private DistanceSensor LeftDistance;
     //private DistanceSensor RightDistance;
     //double avgdist = 0;
+    private Servo Drone = null; //Drone launcher servo
     private static final boolean USE_WEBCAM = true;  // Set true to use a webcam, or false for a phone camera
     static int DESIRED_TAG_ID = -1;// Choose the tag you want to approach or set to -1 for ANY tag
 
@@ -250,6 +251,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.update();
             }
         }
+        Drone.setPosition(0);
 
         // waitForStart();  commented out because it may no longer be needed.  delete at some point
 
@@ -370,7 +372,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  moveRobot2AprilTag(avgdist, 0,0);
              }
 */
-
+            if (gamepad2.back && gamepad1.back) {
+                Drone.setPosition(.25);
+            }
              telemetry.update();
 
 
