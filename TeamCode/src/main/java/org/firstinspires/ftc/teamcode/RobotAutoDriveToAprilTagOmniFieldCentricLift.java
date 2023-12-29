@@ -113,6 +113,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentricLift extends LinearOpMode {
     private Servo Bucket =null; //Bucket Servo
     private Servo Hanger = null; //Hanger Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
+    private Servo Lens = null; // Moves Lens on and off for Prop and April Tags
     //private DistanceSensor LeftDistance;
     //private DistanceSensor RightDistance;
     //double avgdist = 0;
@@ -161,6 +162,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentricLift extends LinearOpMode {
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         Hanger = hardwareMap.get(Servo.class,"Hanger");
         IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
+        Lens = hardwareMap.get(Servo.class,"Lens");
         //LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         //RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
 
@@ -181,6 +183,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentricLift extends LinearOpMode {
         Bucket.setDirection(Servo.Direction.REVERSE);
         Hanger.setDirection(Servo.Direction.FORWARD);
         IntakeLinkage.setDirection(Servo.Direction.FORWARD);
+        Lens.setDirection(Servo.Direction.FORWARD);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         SlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);

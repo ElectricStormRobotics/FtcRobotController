@@ -134,6 +134,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
+    private Servo Lens = null; // Moves Lens on and off for Prop and April Tags
     private IMU      imu         = null;      // Control/Expansion Hub IMU
 
     private double          headingError  = 0;
@@ -218,6 +219,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         IntakeLinkage = hardwareMap.get(Servo.class, "IntakeLinkage");
+        Lens = hardwareMap.get(Servo.class,"Lens");
 
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // When run, this OpMode should start both motors driving forward. So adjust these two lines based on your first test drive.
@@ -229,6 +231,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.REVERSE);
         IntakeLinkage.setDirection(Servo.Direction.FORWARD);
+        Lens.setDirection(Servo.Direction.FORWARD);
 
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
@@ -260,6 +263,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             IntakeLinkage.setPosition(0.0);
             Bucket.setPosition(0.05);
             Wrist.setPosition(0.1);
+            Lens.setPosition(0.6);
             telemetryTfod();
             telemetry.update();
             sleep(20);
@@ -287,6 +291,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
 
         // if position == 2 pixel goes to center spike
         IntakeLinkage.setPosition(0.2);
+        Lens.setPosition(0.6);
         if (TeamElementPosition == 2) {
             driveStraight(DRIVE_SPEED, 28.0, 0.0);
             driveStraight(DRIVE_SPEED, -5.0, 0.0);

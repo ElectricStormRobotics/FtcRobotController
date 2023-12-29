@@ -87,7 +87,7 @@ import java.util.concurrent.TimeUnit;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list.
  *
  */
-
+// HELLO WORLD
 @TeleOp(name="Omni Drive To AprilTag Field Centric", group = "Concept")
 //@Disabled
 public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
@@ -117,6 +117,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private Servo Bucket =null; //Bucket Servo
     private Servo Hanger = null; //Hanger Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
+    private Servo Lens = null; // Moves Lens on and off for Prop and April Tags
     //private DistanceSensor LeftDistance;
     //private DistanceSensor RightDistance;
     //double avgdist = 0;
@@ -130,7 +131,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     int blueTeam = 1;
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
-    double g = (.0001); // Slide is all the way down
+    double lwst = 0.8; // How far the intake goes down
+    double g = (.00005); // Slide is all the way down
     double intakePwr = 1; // sets the pwr to intake
     double intakeup = 1; // the intake is up
     double boost = .55;
@@ -166,6 +168,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         Hanger = hardwareMap.get(Servo.class,"Hanger");
         IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
+        Lens = hardwareMap.get(Servo.class,"Lens");
         //LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         //RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
 
@@ -186,6 +189,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Bucket.setDirection(Servo.Direction.REVERSE);
         Hanger.setDirection(Servo.Direction.FORWARD);
         IntakeLinkage.setDirection(Servo.Direction.FORWARD);
+        Lens.setDirection(Servo.Direction.FORWARD);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         SlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -221,6 +225,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
         while (opModeInInit()) {
             boost = .55;
+            Lens.setPosition(0.6);
             Bucket.setPosition(0.075);
             Wrist.setPosition(0.03);
             Hanger.setPosition(0.0);
@@ -275,7 +280,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
 
             targetFound = false;
             desiredTag  = null;
-
+            Lens.setPosition(0);
             if (gamepad1.x) {
                 intDirection = 1;   // Goes Into Robot
             }
@@ -329,6 +334,12 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 intakeOn = -1;
             }
 
+            if (gamepad1.dpad_up && lwst >= .4) {
+                lwst = (lwst - 0.025);
+            }
+            else if (gamepad1.dpad_down && lwst <= 0.8) {
+                lwst = (lwst + 0.025);
+            }
 
             if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(0.075);
@@ -338,7 +349,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  Wrist.setPosition(0.9);
                  Bucket.setPosition(0.7);
              }
-             if (gamepad2.x && SlideLeft.getCurrentPosition() <= -200) {
+             if (gamepad2.x) {
 
                  intakeup = intakeup*-1;
              }
@@ -346,7 +357,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  IntakeLinkage.setPosition(0.0);
              }
              else {
-                 IntakeLinkage.setPosition(0.8);
+                 IntakeLinkage.setPosition(lwst);
              }
    /*          if (avgdist <= .5){
                  telemetry.addLine("UNDER 1 INCHES");
