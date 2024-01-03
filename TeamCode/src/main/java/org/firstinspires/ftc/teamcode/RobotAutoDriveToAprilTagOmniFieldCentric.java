@@ -115,7 +115,6 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private DcMotor Winch = null; // Raises the Robot
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
-    private Servo Hanger = null; //Hanger Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
     private Servo Lens = null; // Moves Lens on and off for Prop and April Tags
     //private DistanceSensor LeftDistance;
@@ -167,9 +166,9 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Winch = hardwareMap.get(DcMotor.class, "Winch");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
-        Hanger = hardwareMap.get(Servo.class,"Hanger");
         IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
         Lens = hardwareMap.get(Servo.class,"Lens");
+        Drone = hardwareMap.get(Servo.class, "Drone");
         //LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         //RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
 
@@ -188,7 +187,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Winch.setDirection(DcMotorSimple.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.REVERSE);
-        Hanger.setDirection(Servo.Direction.FORWARD);
+        Drone.setDirection(Servo.Direction.REVERSE);
         IntakeLinkage.setDirection(Servo.Direction.FORWARD);
         Lens.setDirection(Servo.Direction.FORWARD);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -229,7 +228,6 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             Lens.setPosition(0.6);
             Bucket.setPosition(0.075);
             Wrist.setPosition(0.03);
-            Hanger.setPosition(0.0);
             IntakeLinkage.setPosition(0.0);
             telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
 
@@ -251,7 +249,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.update();
             }
         }
-        Drone.setPosition(0);
+        Drone.setPosition(.25);
 
         // waitForStart();  commented out because it may no longer be needed.  delete at some point
 
@@ -373,7 +371,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
              }
 */
             if (gamepad2.back && gamepad1.back) {
-                Drone.setPosition(.25);
+                Drone.setPosition(.6);
             }
              telemetry.update();
 
