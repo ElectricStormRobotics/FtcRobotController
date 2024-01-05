@@ -307,7 +307,7 @@ public class LeftAutoBackstage extends LinearOpMode {
 
             driveStraight(DRIVE_SPEED, -2.0, 90.0);
 
-            StrafeLeft(DRIVE_SPEED, 32.0, 90.0);
+            StrafeLeft(DRIVE_SPEED, 34.0, 90.0);
             driveStraight(DRIVE_SPEED, 10.0, 90.0);
         }
         else {
