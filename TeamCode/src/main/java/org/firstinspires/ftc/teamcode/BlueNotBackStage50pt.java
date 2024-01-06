@@ -305,7 +305,7 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             turnToHeading(TURN_SPEED, 90.0 );
             driveStraight(DRIVE_SPEED, 97.0, 90.0);
 
-            StrafeLeft(DRIVE_SPEED, 32.0, 90.0);
+            StrafeLeft(DRIVE_SPEED, 33.0, 90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -332,13 +332,13 @@ public class BlueNotBackStage50pt extends LinearOpMode {
             turnToHeading(TURN_SPEED, 90.0 );
             driveStraight(DRIVE_SPEED, 97.0, 90.0);
 
-            StrafeLeft(DRIVE_SPEED, 26.0, 90.0);
+            StrafeLeft(DRIVE_SPEED, 28.0, 90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(.15, 20.0, 90.0);
+            driveStraight(.15, 23.0, 90.0);
         }
         else {
             driveStraight(DRIVE_SPEED, 5.0, 0.0);
