@@ -257,8 +257,8 @@ public class RightAutoBackstage extends LinearOpMode {
         IntakeLinkage.setPosition(0.2);
         Lens.setPosition(0.6);
         if (TeamElementPosition == 2) {
-            driveStraight(DRIVE_SPEED, 28.0, 0.0);
-            driveStraight(DRIVE_SPEED, -23.0, 0.0);
+            driveStraight(DRIVE_SPEED, 29.0, 0.0);
+            driveStraight(DRIVE_SPEED, -24.0, 0.0);
 
             turnToHeading(TURN_SPEED, -90.0);
             driveStraight(DRIVE_SPEED, 28.0, -90.0);

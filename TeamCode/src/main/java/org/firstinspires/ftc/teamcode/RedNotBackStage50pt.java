@@ -306,7 +306,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
             turnToHeading(TURN_SPEED, -90.0 );
             driveStraight(DRIVE_SPEED, 99.0, -90.0);
 
-            StrafeRight(DRIVE_SPEED, 28.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 29.0, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -335,7 +335,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
             driveStraight(DRIVE_SPEED, 90.0, -90.0);
 
 
-            StrafeRight(DRIVE_SPEED, 40.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 39.0, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -362,15 +362,15 @@ public class RedNotBackStage50pt extends LinearOpMode {
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
             turnToHeading(TURN_SPEED, -90.0 );
-            driveStraight(DRIVE_SPEED, 98.0, -90.0);
+            driveStraight(DRIVE_SPEED, 100.0, -90.0);
 
-            StrafeRight(DRIVE_SPEED, 24.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 18.5, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(.15, 23.0, -90.0);
+            driveStraight(.15, 20.0, -90.0);
         }
 
 

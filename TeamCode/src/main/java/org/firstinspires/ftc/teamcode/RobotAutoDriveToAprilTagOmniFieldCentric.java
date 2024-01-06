@@ -188,7 +188,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Winch.setDirection(DcMotorSimple.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.REVERSE);
-        Drone.setDirection(Servo.Direction.REVERSE);
+        Drone.setDirection(Servo.Direction.REVERSE); //
         IntakeLinkage.setDirection(Servo.Direction.FORWARD);
         Lens.setDirection(Servo.Direction.FORWARD);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -227,7 +227,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         while (opModeInInit()) {
             boost = .55;
             Lens.setPosition(0.6);
-            Bucket.setPosition(0.075);
+            Bucket.setPosition(0.085);
             Wrist.setPosition(0.03);
 
             IntakeLinkage.setPosition(0.0);
@@ -283,7 +283,6 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             targetFound = false;
             desiredTag  = null;
             Lens.setPosition(0);
-            Drone.setPosition(0.0);
             if (gamepad1.x) {
                 intDirection = 1;   // Goes Into Robot
             }
@@ -337,8 +336,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 intakeOn = -1;
             }
 
-            if (gamepad2.back && gamepad1.back) {
-                Drone.setPosition(.25);
+            if (gamepad2.right_stick_button) {
+                Drone.setPosition(.6);
             }
 
             if (gamepad1.dpad_up && lwst >= 0.4) {
@@ -349,7 +348,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             }
 
             if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
-                 Bucket.setPosition(0.075);
+                 Bucket.setPosition(0.085);
                  Wrist.setPosition(0.03);
              }
              else if (gamepad2.left_bumper && Bucket.getPosition() < 0.4 && Wrist.getPosition() > .6) {
@@ -377,9 +376,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                  moveRobot2AprilTag(avgdist, 0,0);
              }
 */
-            if (gamepad2.back) {
-                Drone.setPosition(.25);
-            }
+
              telemetry.update();
 
 
