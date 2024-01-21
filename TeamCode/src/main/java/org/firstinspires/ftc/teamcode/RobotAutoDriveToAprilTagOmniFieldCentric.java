@@ -118,6 +118,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
     private Servo Lens = null; // Moves Lens on and off for Prop and April Tags
     private Servo Drone = null; // Drone
+    private Servo Nosepicker = null; //Pixel Rearrager
     //private DistanceSensor LeftDistance;
     //private DistanceSensor RightDistance;
     //double avgdist = 0;
@@ -127,12 +128,13 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private VisionPortal visionPortal;               // Used to manage the video source.
     private AprilTagProcessor aprilTag;              // Used for managing the AprilTag detection process.
     private AprilTagDetection desiredTag = null;     // Used to hold the data for a detected AprilTag
-    int redTeam = 1;
-    int blueTeam = 1;
+    int redTeam = 0;
+    int blueTeam = 0;
     int intDirection = 1;  // Into Robot
     int intakeOn = -1;     // Intake Off
     double lwst = 0.8; // How far the intake goes down
     double g = (.00005); // Slide is all the way down
+    double bucketpos = 1.0; // The positon of the bucket for scoring
     double intakePwr = 1; // sets the pwr to intake
     double intakeup = 1; // the intake is up
     double boost = .55;
@@ -166,10 +168,11 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Winch = hardwareMap.get(DcMotor.class, "Winch");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
-
+        Nosepicker = hardwareMap.get(Servo.class, "NosePicker");
         IntakeLinkage = hardwareMap.get(Servo.class,"IntakeLinkage");
         Lens = hardwareMap.get(Servo.class,"Lens");
         Drone = hardwareMap.get(Servo.class, "Drone");
+
         //LeftDistance = hardwareMap.get(DistanceSensor.class, "LeftDistance");
         //RightDistance = hardwareMap.get(DistanceSensor.class, "RightDistance");
 
@@ -191,6 +194,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Drone.setDirection(Servo.Direction.REVERSE); //
         IntakeLinkage.setDirection(Servo.Direction.FORWARD);
         Lens.setDirection(Servo.Direction.FORWARD);
+        Nosepicker.setDirection(Servo.Direction.REVERSE);
         Intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Intake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         SlideLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -228,7 +232,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             boost = .55;
             Lens.setPosition(0.6);
             Bucket.setPosition(0.085);
-            Wrist.setPosition(0.03);
+            Wrist.setPosition(0.045);
+            Nosepicker.setPosition(0.0);
 
             IntakeLinkage.setPosition(0.0);
             telemetry.addData("Intake Linkage", IntakeLinkage.getPosition());
@@ -236,7 +241,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             if (gamepad1.x) {
                 blueTeam = 1;
                 redTeam = 0;
-                telemetry.addData("Red ", "Team");
+                telemetry.addData("Red", "Team");
                 telemetry.update();
             } else if (gamepad1.b) {
                 redTeam = 1;
@@ -329,6 +334,24 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 Bucket.setPosition(0.3);
 
             }
+             if (gamepad1.dpad_up) {
+                 Nosepicker.setPosition(.25);
+             }
+            if (gamepad1.dpad_down) {
+                Nosepicker.setPosition(0.0);
+            }
+            if (gamepad1.dpad_left) {
+                Back_Right.setPower(-.55);
+                Back_Left.setPower(.55);
+                Front_Left.setPower(-.55);
+                Front_Right.setPower(.55);
+            }
+            if (gamepad1.dpad_right) {
+                Back_Right.setPower(.55);
+                Back_Left.setPower(-.55);
+                Front_Left.setPower(.55);
+                Front_Right.setPower(-.55);
+            }
              if (gamepad1.x || gamepad1.b)   {
                  intakeOn = 1;
              }
@@ -339,21 +362,26 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
             if (gamepad2.right_stick_button) {
                 Drone.setPosition(.6);
             }
+            if (gamepad2.left_stick_button) {
+                Wrist.setPosition(.15);
+                Bucket.setPosition(.3);
+                lwst = 0.0;
+            }
 
-            if (gamepad1.dpad_up && lwst >= 0.4) {
+            if (gamepad2.dpad_up && lwst >= 0.4) {
                 lwst = (lwst - 0.025);
             }
-            else if (gamepad1.dpad_down && lwst <= 0.8) {
+            else if (gamepad2.dpad_down && lwst <= 0.8) {
                 lwst = (lwst + 0.025);
             }
 
             if (gamepad2.right_bumper && Bucket.getPosition() > 0.3 && SlideLeft.getCurrentPosition() <= -200) {
                  Bucket.setPosition(0.085);
-                 Wrist.setPosition(0.03);
+                 Wrist.setPosition(0.042);
              }
              else if (gamepad2.left_bumper && Bucket.getPosition() < 0.4 && Wrist.getPosition() > .6) {
                  Wrist.setPosition(0.9);
-                 Bucket.setPosition(0.7);
+                 Bucket.setPosition(0.75);
              }
              if (gamepad2.x) {
 

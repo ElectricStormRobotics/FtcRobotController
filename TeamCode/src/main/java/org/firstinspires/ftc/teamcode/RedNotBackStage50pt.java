@@ -169,7 +169,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
 
     // These constants define the desired driving/control characteristics
     // They can/should be tweaked to suit the specific robot drive train.
-    static final double     DRIVE_SPEED             = 0.55;     // Max driving speed for better distance accuracy.
+    static final double     DRIVE_SPEED             = 0.4;     // Max driving speed for better distance accuracy.
     static final double     TURN_SPEED              = 0.35;     // Max Turn speed to limit turn rate
     static final double     HEADING_THRESHOLD       = 1.0 ;    // How close must the heading get to the target before moving to next step.
                                                                // Requiring more accuracy (a smaller number) will often make the turn take longer to get into the final position.
@@ -306,7 +306,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
             turnToHeading(TURN_SPEED, -90.0 );
             driveStraight(DRIVE_SPEED, 99.0, -90.0);
 
-            StrafeRight(DRIVE_SPEED, 29.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 32.0, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -317,54 +317,54 @@ public class RedNotBackStage50pt extends LinearOpMode {
         else if (TeamElementPosition == 3) {
 
             //RIGHT
-            driveStraight(DRIVE_SPEED, 5.0, 0.0);
-            driveStraight(DRIVE_SPEED, 28.0, -40.0);
+            driveStraight(DRIVE_SPEED, 2.0, 0.0);
+            driveStraight(DRIVE_SPEED, 35.0, -40.0);
             turnToHeading( TURN_SPEED, -40.0);
             waittimer(.125);
 
-            driveStraight(DRIVE_SPEED, -15, 0.0);
+            driveStraight(DRIVE_SPEED, -25, 0.0);
             turnToHeading( TURN_SPEED, 0.0);
             waittimer(.125);
-            StrafeLeft(DRIVE_SPEED, 20.0, 0.0);
+            StrafeLeft(DRIVE_SPEED, 18.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
-            driveStraight(DRIVE_SPEED, 40.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 3.5);
+            driveStraight(DRIVE_SPEED, 42.0, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 2.5);
 
             turnToHeading(TURN_SPEED, -90.0 );
-            driveStraight(DRIVE_SPEED, 90.0, -90.0);
+            driveStraight(DRIVE_SPEED, 93.0, -90.0);
 
 
-            StrafeRight(DRIVE_SPEED, 39.0, -90.0);
+            StrafeRight(DRIVE_SPEED, 34, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             leftBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightBackDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            driveStraight(.15, 23.0, -90.0);
+            driveStraight(.15, 28.0, -90.0);
         }
         else {
 
             //LEFT
-            driveStraight(DRIVE_SPEED, 5.0,25.0);
-            driveStraight(DRIVE_SPEED, 20.0, 25.0);
+            driveStraight(DRIVE_SPEED, 8.0,0.0);
+            driveStraight(DRIVE_SPEED, 22.0, 35.0);
             turnToHeading( TURN_SPEED, 25.0);
             waittimer(.125);
 
-            driveStraight(DRIVE_SPEED, -15.0,0.0);
+            driveStraight(DRIVE_SPEED, -18.0,0.0);
             turnToHeading( TURN_SPEED, 0.0);
             waittimer(.125);
 
-            StrafeLeft(DRIVE_SPEED, 17.0, 0.0);
-            holdHeading(TURN_SPEED, 0.0, 8.5);
+            StrafeLeft(DRIVE_SPEED, 19.5, 0.0);
+            holdHeading(TURN_SPEED, 0.0, 4.5);
 
-            driveStraight(DRIVE_SPEED, 46.0, 0.0);
+            driveStraight(DRIVE_SPEED, 44.0, 0.0);
             holdHeading(TURN_SPEED, 0.0, 0.5);
 
             turnToHeading(TURN_SPEED, -90.0 );
             driveStraight(DRIVE_SPEED, 100.0, -90.0);
 
-            StrafeRight(DRIVE_SPEED, 18.5, -90.0);
+            StrafeRight(DRIVE_SPEED, 25, -90.0);
 
             leftFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             rightFrontDrive.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -457,8 +457,8 @@ public class RedNotBackStage50pt extends LinearOpMode {
         Bucket.setPosition(.3);
         Wrist.setPosition(.7);
         waittimer(2);
-        Wrist.setPosition(1);
-        Bucket.setPosition(.7);
+        Wrist.setPosition(.9);
+        Bucket.setPosition(.8);
         waittimer(1);
         Bucket.setPosition(0.05);
         Wrist.setPosition(0.1);
@@ -1184,6 +1184,7 @@ public class RedNotBackStage50pt extends LinearOpMode {
         if (currentRecognitions.size() == 0) {
             TeamElementPosition = 3;
             telemetry.addData("Spike Position", "Spike 3");
+            telemetry.addData("Heading", getHeading());
         }   // end for() loop
     }
 }
