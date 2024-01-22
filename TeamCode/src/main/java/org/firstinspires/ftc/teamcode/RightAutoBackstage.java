@@ -312,6 +312,19 @@ public class RightAutoBackstage extends LinearOpMode {
         Bucket.setPosition(0.05);
         Wrist.setPosition(0.1);
 
+        if (TeamElementPosition == 2) {
+
+        }
+
+        else if (TeamElementPosition == 3) {
+
+        }
+
+        else {
+
+
+
+        }
 
         /*driveStraight(DRIVE_SPEED, 24.0, 0.0);    // Drive Forward 24"
         turnToHeading( TURN_SPEED, -45.0);               // Turn  CW to -45 Degrees
