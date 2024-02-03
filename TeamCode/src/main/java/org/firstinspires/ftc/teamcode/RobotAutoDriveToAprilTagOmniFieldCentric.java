@@ -112,6 +112,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
     private DcMotor Intake = null; // Used for the intake pulleys
     private DcMotor SlideLeft =null; // First slide motor
     private DcMotor SlideRight =null;// Second slide motor
+    private DcMotor Winch = null; // Raises the Robot
     private Servo Wrist =null; // Wrist Servo
     private Servo Bucket =null; //Bucket Servo
     private Servo IntakeLinkage = null; // Runs Linkage for the intake drop down
@@ -164,6 +165,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Intake = hardwareMap.get(DcMotor.class, "Intake");
         SlideLeft = hardwareMap.get(DcMotor.class, "SlideLeft");
         SlideRight = hardwareMap.get(DcMotor.class, "SlideRight");
+        Winch = hardwareMap.get(DcMotor.class, "Winch");
         Wrist = hardwareMap.get(Servo.class, "Wrist");
         Bucket = hardwareMap.get(Servo.class, "Bucket");
         Nosepicker = hardwareMap.get(Servo.class, "NosePicker");
@@ -186,6 +188,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         Back_Right.setDirection(DcMotor.Direction.FORWARD);
         Intake.setDirection(DcMotorSimple.Direction.FORWARD);
         SlideLeft.setDirection(DcMotorSimple.Direction.REVERSE);
+        Winch.setDirection(DcMotorSimple.Direction.FORWARD);
         Wrist.setDirection(Servo.Direction.FORWARD);
         Bucket.setDirection(Servo.Direction.REVERSE);
         Drone.setDirection(Servo.Direction.REVERSE); //
@@ -198,6 +201,8 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
         SlideLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         SlideRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         SlideRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        Winch.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Winch.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         // Retrieve the IMU from the hardware map
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -494,18 +499,7 @@ public class RobotAutoDriveToAprilTagOmniFieldCentric extends LinearOpMode {
                 telemetry.addData("Auto","Drive %5.2f, Strafe %5.2f, Turn %5.2f ", drive, strafe, turn);
                 moveRobot2AprilTag(drive, strafe, turn);
             }
-            else if (gamepad1.dpad_right) {
-                Back_Right.setPower(.55);
-                Back_Left.setPower(-.55);
-                Front_Left.setPower(.55);
-                Front_Right.setPower(-.55);
-            }
-            else if (gamepad1.dpad_left) {
-                Back_Right.setPower(-.55);
-                Back_Left.setPower(.55);
-                Front_Left.setPower(-.55);
-                Front_Right.setPower(.55);
-            }
+
             else {
                 boost = .55;                /**
                  * Move robot according to desired axes motions
