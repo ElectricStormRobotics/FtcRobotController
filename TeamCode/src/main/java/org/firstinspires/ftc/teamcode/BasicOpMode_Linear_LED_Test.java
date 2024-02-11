@@ -52,13 +52,18 @@ import com.qualcomm.robotcore.util.Range;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Test_LED", group="Linear OpMode")
+@TeleOp(name="Test_LEDv2", group="Linear OpMode")
 //@Disabled
 public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime ledtimer = new ElapsedTime();
     private neopixel_i2c LED_strip;
+    private boolean led_race=true;
+
+    private boolean led_off = true;
+    private boolean end_game = false;
 
 
     @Override
@@ -71,11 +76,16 @@ public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
         //sleep(500);
         //LED_strip.writeLED();
         LED_strip.doInitialize();
+        //Assign the RGB order for the led strip
+        neopixel_i2c.RGB_order =1;
+        int led_countdown = 0;
+        int num_pixels = 31; // number of pixels (LEDs) in to work with.
 
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+        ledtimer.reset();
 
         boolean doOnce = true;
         // run until the end of the match (driver presses STOP)
@@ -84,65 +94,40 @@ public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
            int red = 0xFF;
            int blue = 0x00;
            int green = 0x00;
-           int num_pixels = 18; // number of pixels (LEDs) in to work with.
+
             // Doesn't need to be the whole strip, but needs to be all the LEDs planned to be used
 
 
-           if(doOnce) {
-               LED_strip.writeLEDstrip(num_pixels, red, green, blue);
-               doOnce = false;
-               // Show the elapsed game time and wheel power.
-               telemetry.addData("LED Strip Color", "testing color Red");
-               telemetry.update();
-               waittimer(100);
-           }
-            for(int i=0;i<num_pixels;i++){
-                LED_strip.writeSingleLED(i,num_pixels,0x00,0x00,0xFF);
-                waittimer(25);
-                doOnce=false;
-            }
-            for(int i=0;i<num_pixels;i++){
-                LED_strip.writeSingleLED(i,num_pixels,0xFF,0x00,0x00);
-                waittimer(25);
-            }
+            if(runtime.seconds()> 30 && led_countdown<3)//end game final count down sets lights to red
+                {
+                    LED_strip.writeLEDstrip(num_pixels, 0xFF, 0x00, 0x00);
+                    led_countdown = 3;
+                    telemetry.addData("","30 seconds");
+                    telemetry.update();
+                }
+            else if (runtime.seconds()> 25 && led_countdown<2)//5 secs end game final count down
+                // sets lights to blue
+                {
+                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0x00, 0xff);
+                    led_countdown = 2;
+                    telemetry.addData("","25 seconds");
+                    telemetry.update();
+                }
+            else if (runtime.seconds()> 15 && led_countdown<1)//5 secs end game final count down
+            // sets lights to green
+                {
+                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0xff, 0x00);
+                    led_countdown = 1;
+                    telemetry.addData("","15 seconds");
+                    telemetry.update();
+                }
+            else {}
 
-            //example code below sets the strip to Green, then Blue, then Yellow, then Pink
-            //waits 500 milliseconds
-           /* red = 0x00;
-            green = 0xFF;
-            blue = 0x00;
-            LED_strip.writeLEDstrip(num_pixels, red, green, blue);
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("LED Strip Color", "testing color Green");
+
+           // telemetry.addData("Status", "LED Timer: " + ledtimer.toString());
+            telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.update();
-            waittimer(500);
-            red = 0x00;
-            green = 0x00;
-            blue = 0xFF;
-            LED_strip.writeLEDstrip(num_pixels, red, green, blue);
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("LED Strip Color", "testing color Blue");
-            telemetry.update();
-            waittimer(500);
-            red = 0xFF;
-            green = 0xFF;
-            blue = 0x00;
-            LED_strip.writeLEDstrip(num_pixels
-                    ,red, green, blue);
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("LED Strip Color", "testing color Yellow");
-            telemetry.update();
-            waittimer(500);
-            red = 0xFF;
-            green = 0x14;
-            blue = 0x93;
-            LED_strip.writeLEDstrip(num_pixels
-                    ,red, green, blue);
-            // Show the elapsed game time and wheel power.
-            telemetry.addData("LED Strip Color", "testing color PINK");
-            telemetry.update();
-            waittimer(500);*/
-        }
+            }
 
     }
     public void waittimer(double time_ms) {
