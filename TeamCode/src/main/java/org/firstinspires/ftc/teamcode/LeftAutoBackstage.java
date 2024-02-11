@@ -332,7 +332,7 @@ public class LeftAutoBackstage extends LinearOpMode {
             Bucket.setPosition(.3);
             Wrist.setPosition(.7);
             waittimer(2);
-            Wrist.setPosition(1.0);
+            Wrist.setPosition(.9);
             Bucket.setPosition(.7);
             waittimer(1);
             Bucket.setPosition(0.05);
