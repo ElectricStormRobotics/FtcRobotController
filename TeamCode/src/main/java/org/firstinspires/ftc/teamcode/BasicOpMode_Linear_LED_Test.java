@@ -40,19 +40,15 @@ import com.qualcomm.robotcore.util.Range;
 
 
 /*
- * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
- * the autonomous or the teleop period of an FTC match. The names of OpModes appear on the menu
- * of the FTC Driver Station. When a selection is made from the menu, the corresponding OpMode
- * class is instantiated on the Robot Controller and executed.
- *
- * This particular OpMode just executes a basic Tank Drive Teleop for a two wheeled robot
- * It includes all the skeletal structure that all linear OpModes contain.
- *
- * Use Android Studio to Copy this Class, and Paste it into your team's code folder with a new name.
- * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
+ * This file contains an minimal example of a how to utilize the neopixel_i2c class to light up
+ * an LED strip.
+ * This OpMode waits until the opmode has been running for 15 seconds and then turns on the led strip
+ * after 20 seconds it changes the color
+ * after 25 seconds it change the color again.
+ * the number of leds in the strip is defined
  */
 
-@TeleOp(name="Test_LEDv2", group="Linear OpMode")
+@TeleOp(name="Test_LEDv1", group="Linear OpMode")
 //@Disabled
 public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
 
@@ -64,6 +60,7 @@ public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
 
     private boolean led_off = true;
     private boolean end_game = false;
+    private int pix_on = 1; //sets all leds on (2 sets every other, 3 sets every 3rd)
 
 
     @Override
@@ -73,13 +70,13 @@ public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
 
         // Initialize the hardware variables.
         LED_strip  = hardwareMap.get(neopixel_i2c.class, "led_strip");
-        //sleep(500);
-        //LED_strip.writeLED();
-        LED_strip.doInitialize();
+
         //Assign the RGB order for the led strip
-        neopixel_i2c.RGB_order =1;
+        neopixel_i2c.RGB_order =1; // order 1 means G R B
         int led_countdown = 0;
-        int num_pixels = 31; // number of pixels (LEDs) in to work with.
+        int num_pixels = 300; // number of pixels (LEDs) in to work with.
+        //LED_strip.doInitialize();
+        LED_strip.doInitialized(num_pixels);
 
 
         // Wait for the game to start (driver presses PLAY)
@@ -96,27 +93,49 @@ public class BasicOpMode_Linear_LED_Test extends LinearOpMode {
            int green = 0x00;
 
             // Doesn't need to be the whole strip, but needs to be all the LEDs planned to be used
+            if((runtime.seconds()%60)>= 59)// reset to off
+            {
+                LED_strip.writeLEDstrip(num_pixels, 0x00, 0x00, 0x00,pix_on);
+                led_countdown = 0;
+                telemetry.addData("","60 seconds");
+                telemetry.update();
+            }
 
+            else if((runtime.seconds()%60)> 50 && led_countdown<5)// 50 secs teal
+            {
+                LED_strip.writeLEDstrip(num_pixels, 0x00, 0xFF, 0xff,pix_on);
+                led_countdown = 5;
+                telemetry.addData("","50 seconds");
+                telemetry.update();
+            }
 
-            if(runtime.seconds()> 30 && led_countdown<3)//end game final count down sets lights to red
+            else if((runtime.seconds()%60)> 40 && led_countdown<4)// 40 secs yellow
+            {
+                LED_strip.writeLEDstrip(num_pixels, 0xFF, 0xFF, 0x00,pix_on);
+                led_countdown = 4;
+                telemetry.addData("","40 seconds");
+                telemetry.update();
+            }
+
+            else if((runtime.seconds()%60)> 30 && led_countdown<3)// 30 seconds red
                 {
-                    LED_strip.writeLEDstrip(num_pixels, 0xFF, 0x00, 0x00);
+                    LED_strip.writeLEDstrip(num_pixels, 0xFF, 0x00, 0x00,pix_on);
                     led_countdown = 3;
                     telemetry.addData("","30 seconds");
                     telemetry.update();
                 }
-            else if (runtime.seconds()> 25 && led_countdown<2)//5 secs end game final count down
+            else if ((runtime.seconds()%60)> 20 && led_countdown<2)//20 seconds blue
                 // sets lights to blue
                 {
-                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0x00, 0xff);
+                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0x00, 0xff,pix_on);
                     led_countdown = 2;
                     telemetry.addData("","25 seconds");
                     telemetry.update();
                 }
-            else if (runtime.seconds()> 15 && led_countdown<1)//5 secs end game final count down
+            else if ((runtime.seconds()%60)> 10 && led_countdown<1)//10 secs green
             // sets lights to green
                 {
-                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0xff, 0x00);
+                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0xff, 0x00,pix_on);
                     led_countdown = 1;
                     telemetry.addData("","15 seconds");
                     telemetry.update();

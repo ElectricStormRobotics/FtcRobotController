@@ -40,7 +40,7 @@ public class neopixel_i2c extends I2cDeviceSynchDevice<I2cDeviceSynch>
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //Base address for the NeoPixel module is 0x0E according to the NeoPixel sheet
     public final static I2cAddr ADDRESS_I2C_DEFAULT = I2cAddr.create7bit(0x60);
-    public static int RGB_order = 0; // RGB, 1 = GRB
+    public static int RGB_order = 0; // RGB, 1 = GRB, 2 = BRG, 3 = BGR
 
 
 
@@ -69,8 +69,13 @@ public class neopixel_i2c extends I2cDeviceSynchDevice<I2cDeviceSynch>
 
     // Write Method that writes a strip of LEDs to a specific RGB color
     // need to provide the total number of pixels that are part of the strip
-    // Max number of LEDs that can be supported by this method is 85
-    protected void writeLEDstrip(int num_pixels, int red, int green, int blue)
+    // pix_on. determines which pixels are allowed to be on.  Reduces number of pixels in the array
+    // that are actually lit, to help save current draw.
+    // For example 1 means that all pixels are lit
+    // 2 means that every other pixel will be lit
+    // 3 means every 3rd pixel will be lit
+    // 4 means that every 4th pixel will be lit
+    protected void writeLEDstrip(int num_pixels, int red, int green, int blue, int pix_on)
     {
         if (red > 255) {
             red = 255; //forces the max value to fit in a byte
@@ -80,6 +85,9 @@ public class neopixel_i2c extends I2cDeviceSynchDevice<I2cDeviceSynch>
         }
         if (blue > 255) {
             blue = 255; //forces the max value to fit in a byte
+        }
+        if (pix_on >4 || pix_on <1){
+            pix_on = 1;  //
         }
         // save original colors so the color order can be swapped based on RGB order of LED strip
         int orig_red = red;
@@ -119,51 +127,65 @@ public class neopixel_i2c extends I2cDeviceSynchDevice<I2cDeviceSynch>
         byte[] buff_len = {0x03,(byte)(buff_size/256),(byte)(buff_size%256)};
 
 
-        //write the size of the pixel buffer to the neopixel buff register
+        //send the size of the pixel buffer to the neopixel driver buff_length register
         deviceClient.write(0x0e,buff_len);
-        int rounds = num_pixels/5+1;
 
-        for (int j=1; j<(rounds); j++) {
-            //loop through writing 5 LEDs at a time
-            //because the neopixel only has enough buffer space for 9 LEDs in a single i2c message
-            //write the first set of 5 starting with address 0x00
-            //increment by 0x0F each time
-            //If the number of pixels in this round to write is less than 5
-            //make the array size the exact number of pixels in the round
-            if (j*5 >= num_pixels){
+        int rounds = num_pixels/5 + 1; // number of times to iterate through for loop to write pixels
+        for (int k = 0; k<rounds;k++){
+
+            //check if number of pixels remaining to write is less than 5
+            //if true then build the remainder of the pixel array
+            if((k+1) * 5 > num_pixels){
                 byte[] pixel = new byte[3+((num_pixels%5)*3)];
                 pixel[0] = 0x04;
-                pixel[1] = (byte) ((j-1)*5*3/256);
-                pixel[2] = (byte) (((j-1) * 0x0F)%256);
+                pixel[1] = (byte) ((k)*0x0F/256);
+                pixel[2] = (byte) (((k) * 0x0F)%256);
 
-                //create loop that writes RGB values for the remaining LEDs
+                //create loop that builds RGB values for the remaining LEDs
                 for (int i = 0; i < (num_pixels%5); i++) {
-                    pixel[3 + i * 3] = (byte) red; // R
-                    pixel[4 + i * 3] = (byte) green; // G
-                    pixel[5 + i * 3] = (byte) blue; // B
+                    if((k*5+i+1)%pix_on==0) {//if the pix position is supposed to be lit
+                        pixel[3 + i * 3] = (byte) red; // R
+                        pixel[4 + i * 3] = (byte) green; // G
+                        pixel[5 + i * 3] = (byte) blue; // B
+                    }
+                    else{
+                        pixel[3 + i * 3] = (byte) 0x00; // R
+                        pixel[4 + i * 3] = (byte) 0x00; // G
+                        pixel[5 + i * 3] = (byte) 0x00; // B
+                    }
                 }
+
+                //send pixel array to the neopixel driver pixel buffer register
                 deviceClient.write(0x0e,pixel);
-                //this.writeShow();
             }
+            //else build 5 pixels worth of RGB values to for pixel array
             else {
                 byte[] pixel = new byte[3 + (5 * 3)];
                 pixel[0] = 0x04;
-                pixel[1] = (byte) ((j-1)*5*3/256);
-                pixel[2] = (byte) (((j-1) * 0x0F)%256);
+                pixel[1] = (byte) ((k) * 0x0F / 256);
+                pixel[2] = (byte) (((k) * 0x0F) % 256);
 
                 //create loop that writes RGB values for the group of 5 LEDs
                 for (int i = 0; i < 5; i++) {
-                    pixel[3 + i * 3] = (byte) red; // R
-                    pixel[4 + i * 3] = (byte) green; // G
-                    pixel[5 + i * 3] = (byte) blue; // B
+                    if((k*5+i+1)%pix_on==0) {//if the pix position is supposed to be lit
+                        pixel[3 + i * 3] = (byte) red; // R
+                        pixel[4 + i * 3] = (byte) green; // G
+                        pixel[5 + i * 3] = (byte) blue; // B
+                    }
+                    else{
+                        pixel[3 + i * 3] = (byte) 0x00; // R
+                        pixel[4 + i * 3] = (byte) 0x00; // G
+                        pixel[5 + i * 3] = (byte) 0x00; // B
+                    }
                 }
+
+                //send pixel array to the neopixel driver pixel buffer register
                 deviceClient.write(0x0e,pixel);
-                //this.writeShow();
             }
 
         }
 
-        //each pixel is 3 bytes for its addressing
+        //send the command to the neopixel board to update the led strip
         this.writeShow();
     }
 
@@ -227,8 +249,6 @@ public class neopixel_i2c extends I2cDeviceSynchDevice<I2cDeviceSynch>
 
         byte[] pixel = new byte[6];
         pixel[0] = 0x04;
-        pixel[1] = 0x00;
-        pixel[2] = (byte) (pixpos*3);
         pixel[1] = (byte) (pixpos*3/256);
         pixel[2] = (byte) ((pixpos*3)%256);
 
@@ -298,7 +318,18 @@ public class neopixel_i2c extends I2cDeviceSynchDevice<I2cDeviceSynch>
         int green = 0;
         int blue = 0;
         //sets a strip of at most 30 leds to off
-        this.writeLEDstrip(31,red, green, blue);
+        this.writeLEDstrip(31,red, green, blue,1);
+        return true;
+    }
+    protected synchronized boolean doInitialized(int num_pixels)
+    {
+        //establish the neopixel pin
+        this.writePin();
+        int red = 0;
+        int green = 0;
+        int blue = 0;
+        //sets a strip of at most 30 leds to off
+        this.writeLEDstrip(num_pixels,red, green, blue,1);
         return true;
     }
 
