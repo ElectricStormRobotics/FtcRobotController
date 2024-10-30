@@ -87,11 +87,15 @@ public class fieldcentricopmode extends LinearOpMode {
     //private boolean end_game = false;
     //private int pix_on = 3; //sets all leds on (2 sets every other, 3 sets every 3rd)
     double boost = 0.55;
-    double elbowdown = 0.1;
-    double elbowup = 0.6;
-    double zeroFlip = 0.0;
+    double elbowdown = 0.6;
+    double elbowup = 0.0;
+    double zeroFlip = 0.32;
+    double ninetyDe = 0.0;
+    double one80 = .65;
     double fullflip =.5;
     boolean armup = false;
+    int intDirection = 1;  // Into Robot
+    int intakeOn = -1;     // Intake Off
 
     double g = (0.00000000000001); // Slide is all the way down
     @Override
@@ -131,14 +135,15 @@ public class fieldcentricopmode extends LinearOpMode {
         Back_Right.setDirection(DcMotor.Direction.FORWARD);
         Slide.setDirection(DcMotor.Direction.FORWARD);
         left_CR.setDirection(DcMotorSimple.Direction.REVERSE);
-        elbow.setDirection(Servo.Direction.REVERSE);
+        elbow.setDirection(Servo.Direction.FORWARD);
+        wrist.setDirection(Servo.Direction.REVERSE);
         // Wait for the game to start (driver presses PLAY)
 
 
         int led_countdown = 0;
         int num_pixels = 300; // number of pixels (LEDs) in to work with.
 
-        elbow.setPosition(elbowup);
+        elbow.setPosition(0);
         wrist.setPosition(0);
         twist.setPosition(zeroFlip);
 
@@ -222,26 +227,37 @@ public class fieldcentricopmode extends LinearOpMode {
  */
 
 
-
-
-
             //TODO Code All da Arm Stuff
             if (gamepad1.a) {
                 left_CR.setPower(1);
                 right_CR.setPower(1);
+
             } else if (gamepad1.b) {
                 left_CR.setPower(-1);
                 right_CR.setPower(-1);
-            } else {
+
+            } else if (gamepad1.x) {
                 left_CR.setPower(0);
                 right_CR.setPower(0);
             }
 
+
             if (gamepad2.dpad_down) {
                 elbow.setPosition(elbowdown);
+                wrist.setPosition(elbowdown);
             }
             if (gamepad2.dpad_up) {
                 elbow.setPosition(elbowup);
+                wrist.setPosition(elbowup);
+            }
+            if (gamepad2.left_bumper) {
+                twist.setPosition(ninetyDe);
+            }
+            else if (gamepad2.right_bumper) {
+                twist.setPosition(one80);
+            }
+            else {
+                twist.setPosition(zeroFlip);
             }
 
             if(PIVOT.getCurrentPosition() < -3000) {
@@ -253,12 +269,14 @@ public class fieldcentricopmode extends LinearOpMode {
 
             //DONE WITH DRIVER 1
             if (!armup) {
-                boost = .75;
-                Slide.setPower(gamepad2.left_stick_y);
+                boost = .65;
+                Slide.setPower(gamepad2.right_stick_y);
+                elbowup = 0.0;
             }
             if (armup) {
-                Slide.setPower(gamepad2.left_stick_y+(g*Slide.getCurrentPosition()));
+                Slide.setPower(gamepad2.right_stick_y+(g*Slide.getCurrentPosition()));
                 boost = .25;
+                elbowup = 0.25;
             }
                            /**
              * Move robot according to desired axes motions
@@ -303,7 +321,7 @@ public class fieldcentricopmode extends LinearOpMode {
                 Back_Left.setPower(backLeftPower);
                 Front_Right.setPower(frontRightPower);
                 Back_Right.setPower(backRightPower);
-                PIVOT.setPower(gamepad2.right_stick_y);
+                PIVOT.setPower(gamepad2.left_stick_y);
 
                 telemetry.addData("Slide: \n", Slide.getCurrentPosition());
                 telemetry.addData("Pivot: \n", PIVOT.getCurrentPosition());
