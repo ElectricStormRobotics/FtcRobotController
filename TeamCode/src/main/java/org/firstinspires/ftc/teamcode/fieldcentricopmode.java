@@ -35,6 +35,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -42,6 +43,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
+import java.util.ServiceLoader;
 
 
 /*
@@ -92,10 +95,10 @@ public class fieldcentricopmode extends LinearOpMode {
     double zeroFlip = 0.32;
     double ninetyDe = 0.0;
     double one80 = .65;
-    double fullflip =.5;
+    double two70 =.9;
+
+    double maxExten = 3000;
     boolean armup = false;
-    int intDirection = 1;  // Into Robot
-    int intakeOn = -1;     // Intake Off
 
     double g = (0.00000000000001); // Slide is all the way down
     @Override
@@ -112,11 +115,11 @@ public class fieldcentricopmode extends LinearOpMode {
         Back_Right = hardwareMap.get(DcMotor.class, "Back_Right");
         Slide = hardwareMap.get(DcMotor.class, "slide");
         PIVOT = hardwareMap.get(DcMotor.class, "PIVOT");
-        left_CR =hardwareMap.get(CRServo.class, "left_CR");
-        right_CR =hardwareMap.get(CRServo.class, "right_CR");
-        wrist =hardwareMap.get(Servo.class, "wrist");
-        elbow =hardwareMap.get(Servo.class, "elbow");
-        twist =hardwareMap.get(Servo.class, "twist");
+        left_CR = hardwareMap.get(CRServo.class, "left_CR");
+        right_CR = hardwareMap.get(CRServo.class, "right_CR");
+        wrist = hardwareMap.get(Servo.class, "wrist");
+        elbow = hardwareMap.get(Servo.class, "elbow");
+        twist = hardwareMap.get(Servo.class, "twist");
 
 
 
@@ -143,11 +146,11 @@ public class fieldcentricopmode extends LinearOpMode {
         int led_countdown = 0;
         int num_pixels = 300; // number of pixels (LEDs) in to work with.
 
+
+        waitForStart();
         elbow.setPosition(0);
         wrist.setPosition(0);
         twist.setPosition(zeroFlip);
-
-        waitForStart();
         runtime.reset();
         //ledtimer.reset();
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -160,8 +163,6 @@ public class fieldcentricopmode extends LinearOpMode {
         imu.initialize(parameters);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-
 
                 int red = 0xFF;
                 int blue = 0x00;
@@ -226,8 +227,9 @@ public class fieldcentricopmode extends LinearOpMode {
 
  */
 
-
             //TODO Code All da Arm Stuff
+
+            // Intake
             if (gamepad1.a) {
                 left_CR.setPower(1);
                 right_CR.setPower(1);
@@ -236,12 +238,13 @@ public class fieldcentricopmode extends LinearOpMode {
                 left_CR.setPower(-1);
                 right_CR.setPower(-1);
 
-            } else if (gamepad1.x) {
+            } else {
                 left_CR.setPower(0);
                 right_CR.setPower(0);
             }
+            // Driver 2 controls
 
-
+            // Elbow
             if (gamepad2.dpad_down) {
                 elbow.setPosition(elbowdown);
                 wrist.setPosition(elbowdown);
@@ -250,17 +253,22 @@ public class fieldcentricopmode extends LinearOpMode {
                 elbow.setPosition(elbowup);
                 wrist.setPosition(elbowup);
             }
-            if (gamepad2.left_bumper) {
+            //Twist/wrist
+            if (gamepad2.left_bumper && !gamepad2.right_bumper) {
                 twist.setPosition(ninetyDe);
             }
-            else if (gamepad2.right_bumper) {
+            else if (gamepad2.right_bumper && !gamepad2.left_bumper) {
                 twist.setPosition(one80);
+            }
+            else if (gamepad2.right_bumper && gamepad2.left_bumper) {
+                twist.setPosition(two70);
             }
             else {
                 twist.setPosition(zeroFlip);
             }
 
-            if(PIVOT.getCurrentPosition() < -3000) {
+            //Arm Code
+            if(PIVOT.getCurrentPosition() < -5000) {
                 armup = true;
             }
             else{
@@ -270,13 +278,20 @@ public class fieldcentricopmode extends LinearOpMode {
             //DONE WITH DRIVER 1
             if (!armup) {
                 boost = .65;
-                Slide.setPower(gamepad2.right_stick_y);
+                if (Slide.getCurrentPosition() < maxExten) {
+                    Slide.setPower(gamepad2.right_stick_y);
+                }
+                else if (Slide.getCurrentPosition() > maxExten && gamepad2.right_stick_y >.1) {
+                    Slide.setPower(0);
+                } else if (Slide.getCurrentPosition() > maxExten && gamepad2.right_stick_y < .1) {
+                    Slide.setPower(gamepad2.right_stick_y);
+                }
                 elbowup = 0.0;
             }
             if (armup) {
-                Slide.setPower(gamepad2.right_stick_y+(g*Slide.getCurrentPosition()));
+                Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
                 boost = .25;
-                elbowup = 0.25;
+                elbowup = 0.0;
             }
                            /**
              * Move robot according to desired axes motions
