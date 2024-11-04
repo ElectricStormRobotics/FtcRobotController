@@ -164,6 +164,9 @@ public class fieldcentricopmode extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
+                double threshold = 0;
+                threshold = DesiredSlideTicks(Slide.getCurrentPosition(),PIVOT.getCurrentPosition());
+
                 int red = 0xFF;
                 int blue = 0x00;
                 int green = 0x00;
@@ -278,20 +281,27 @@ public class fieldcentricopmode extends LinearOpMode {
             //DONE WITH DRIVER 1
             if (!armup) {
                 boost = .65;
-                if (Slide.getCurrentPosition() < maxExten) {
+                /*if (Slide.getCurrentPosition() < maxExten) {
                     Slide.setPower(gamepad2.right_stick_y);
                 }
                 else if (Slide.getCurrentPosition() > maxExten && gamepad2.right_stick_y >.1) {
                     Slide.setPower(0);
                 } else if (Slide.getCurrentPosition() > maxExten && gamepad2.right_stick_y < .1) {
                     Slide.setPower(gamepad2.right_stick_y);
-                }
+                }*/
                 elbowup = 0.0;
             }
             if (armup) {
-                Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
+                //Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
                 boost = .25;
                 elbowup = 0.0;
+            }
+            //Limit Switch
+            if (Slide.getCurrentPosition() < threshold){
+                Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
+            }
+            else {
+                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.0001);
             }
                            /**
              * Move robot according to desired axes motions
@@ -351,6 +361,18 @@ public class fieldcentricopmode extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.update();
         }
+        public double DesiredSlideTicks(int SlidePos, int PivotPos) {
+            double DesiredSlideTicks = 0;
+
+            double PivotAngle = PivotPos/80; // Ticks per degree
+
+            DesiredSlideTicks = (Math.cos(Math.toRadians(PivotAngle)))* 300.439898; //Ticks per inch
+
+            return DesiredSlideTicks;
+
+
+        }
     }
+
 
 
