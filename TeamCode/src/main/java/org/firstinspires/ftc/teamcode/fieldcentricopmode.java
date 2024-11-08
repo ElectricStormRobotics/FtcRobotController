@@ -100,7 +100,7 @@ public class fieldcentricopmode extends LinearOpMode {
     double maxExten = 3000;
     boolean armup = false;
 
-    double g = (0.00000000000001); // Slide is all the way down
+    double g = (0.00000000000002); // Slide is all the way down
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -165,7 +165,7 @@ public class fieldcentricopmode extends LinearOpMode {
         while (opModeIsActive()) {
 
                 double threshold = 0;
-                threshold = DesiredSlideTicks(PIVOT.getCurrentPosition());
+                threshold = -DesiredSlideTicks(PIVOT.getCurrentPosition());
 
                 int red = 0xFF;
                 int blue = 0x00;
@@ -301,7 +301,7 @@ public class fieldcentricopmode extends LinearOpMode {
                 Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
             }
             else {
-                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.0001);
+                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.0005);
             }
                            /**
              * Move robot according to desired axes motions
@@ -350,6 +350,7 @@ public class fieldcentricopmode extends LinearOpMode {
 
                 telemetry.addData("Slide: \n", Slide.getCurrentPosition());
                 telemetry.addData("Pivot: \n", PIVOT.getCurrentPosition());
+                telemetry.addData("threshold", threshold);
 
 
             telemetry.update();
@@ -369,7 +370,7 @@ public class fieldcentricopmode extends LinearOpMode {
 
             if (PivotAngle < 90) {
                 //36 is max horizontal extension
-                DesiredSlideTicks =  36 / (Math.cos(Math.toRadians(PivotAngle))) * 300.439898; //Ticks per inch
+                DesiredSlideTicks =  22 / (Math.cos(Math.toRadians(PivotAngle))) * 300.439898; //Ticks per inch
             } else {
                 DesiredSlideTicks = -10000;
             }
