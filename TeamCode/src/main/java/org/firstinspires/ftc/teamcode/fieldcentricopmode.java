@@ -165,7 +165,7 @@ public class fieldcentricopmode extends LinearOpMode {
         while (opModeIsActive()) {
 
                 double threshold = 0;
-                threshold = DesiredSlideTicks(Slide.getCurrentPosition(),PIVOT.getCurrentPosition());
+                threshold = DesiredSlideTicks(PIVOT.getCurrentPosition());
 
                 int red = 0xFF;
                 int blue = 0x00;
@@ -297,7 +297,7 @@ public class fieldcentricopmode extends LinearOpMode {
                 elbowup = 0.0;
             }
             //Limit Switch
-            if (Slide.getCurrentPosition() < threshold){
+            if (Slide.getCurrentPosition() > threshold){
                 Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
             }
             else {
@@ -361,14 +361,21 @@ public class fieldcentricopmode extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.update();
         }
-        public double DesiredSlideTicks(int SlidePos, int PivotPos) {
+
+        public double DesiredSlideTicks(int PivotPos) {
             double DesiredSlideTicks = 0;
 
-            double PivotAngle = PivotPos/80; // Ticks per degree
+            double PivotAngle = PivotPos / 80; // Ticks per degree
 
-            DesiredSlideTicks = (Math.cos(Math.toRadians(PivotAngle)))* 300.439898; //Ticks per inch
+            if (PivotAngle < 90) {
+                //36 is max horizontal extension
+                DesiredSlideTicks =  36 / (Math.cos(Math.toRadians(PivotAngle))) * 300.439898; //Ticks per inch
+            } else {
+                DesiredSlideTicks = -10000;
+            }
 
             return DesiredSlideTicks;
+
 
 
         }
