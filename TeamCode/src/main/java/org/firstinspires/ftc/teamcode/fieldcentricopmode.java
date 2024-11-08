@@ -98,7 +98,7 @@ public class fieldcentricopmode extends LinearOpMode {
     double two70 =.9;
 
     double maxExten = 3000;
-    boolean armup = false;
+    boolean armup =  false;
 
     double g = (0.00000000000002); // Slide is all the way down
     @Override
