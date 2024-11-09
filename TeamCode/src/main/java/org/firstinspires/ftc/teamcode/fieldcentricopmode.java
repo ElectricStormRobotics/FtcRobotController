@@ -97,10 +97,10 @@ public class fieldcentricopmode extends LinearOpMode {
     double one80 = .65;
     double two70 =.9;
 
-    double maxExten = 3000;
+    double maxExten = -6000;
     boolean armup =  false;
 
-    double g = (0.00000000000002); // Slide is all the way down
+    double g = (0.000000000001); // Slide is all the way down
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -128,9 +128,10 @@ public class fieldcentricopmode extends LinearOpMode {
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      //  Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+       // PIVOT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIVOT.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         PIVOT.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Front_Left.setDirection(DcMotor.Direction.REVERSE);
         Back_Left.setDirection(DcMotor.Direction.REVERSE);
@@ -164,7 +165,10 @@ public class fieldcentricopmode extends LinearOpMode {
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-                double threshold = 0;
+            double PivotAngle = PIVOT.getCurrentPosition() / 80; // Ticks per degree
+
+
+            double threshold = 0;
                 threshold = -DesiredSlideTicks(PIVOT.getCurrentPosition());
 
                 int red = 0xFF;
@@ -248,14 +252,22 @@ public class fieldcentricopmode extends LinearOpMode {
             // Driver 2 controls
 
             // Elbow
-            if (gamepad2.dpad_down) {
+          /*  if (gamepad2.dpad_down && PivotAngle > 45 ) {
                 elbow.setPosition(elbowdown);
                 wrist.setPosition(elbowdown);
             }
+
+            if (gamepad2.dpad_up && PivotAngle > 45) {
+                elbow.setPosition(elbowup);
+                wrist.setPosition(elbowup);
+            }
+
+           */
             if (gamepad2.dpad_up) {
                 elbow.setPosition(elbowup);
                 wrist.setPosition(elbowup);
             }
+
             //Twist/wrist
             if (gamepad2.left_bumper && !gamepad2.right_bumper) {
                 twist.setPosition(ninetyDe);
@@ -281,6 +293,7 @@ public class fieldcentricopmode extends LinearOpMode {
             //DONE WITH DRIVER 1
             if (!armup) {
                 boost = .65;
+                maxExten = -6000;
                 /*if (Slide.getCurrentPosition() < maxExten) {
                     Slide.setPower(gamepad2.right_stick_y);
                 }
@@ -295,13 +308,14 @@ public class fieldcentricopmode extends LinearOpMode {
                 //Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
                 boost = .25;
                 elbowup = 0.0;
+                maxExten = -8000;
             }
             //Limit Switch
             if (Slide.getCurrentPosition() > threshold){
                 Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
             }
             else {
-                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.0005);
+                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.001);
             }
                            /**
              * Move robot according to desired axes motions
