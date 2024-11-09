@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
@@ -18,27 +19,25 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
 
 
-
-    @Config
+@Config
     @Autonomous(name = "TEST", group = "Autonomous")
     public class BASICAUTON extends LinearOpMode {
-
-        public class slide {
-            public int targetPos = 1500;
-            private DcMotorEx slide;
-
-            public slide(HardwareMap hardwareMap) {
-                slide = hardwareMap.get(DcMotorEx.class, "slide");
-                slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                slide.setDirection(DcMotorSimple.Direction.FORWARD);
+        public class PIVOT {
+            private DcMotor Pivot;
+            int targetPos = 1500;
+            public PIVOT(HardwareMap hardwareMap) {
+                Pivot = hardwareMap.get(DcMotor.class, "PIVOT");
+                Pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                Pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                Pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                Pivot.setDirection(DcMotorSimple.Direction.FORWARD);
             }
 
-            public class SlideExtend implements Action {
+
+            public class PivotUp implements Action {
                 private boolean initialized = false;
 
                 @Override
@@ -47,156 +46,226 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
                         initialized = true;
                     }
 
-                    double pos = slide.getCurrentPosition();
-                    packet.put("slidePos", pos);
+                    double pos = Pivot.getCurrentPosition();
+                    packet.put("pivotPos", pos);
 
-                    if (pos < targetPos) {
-                        slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        slide.setPower(0.8);
-                        slide.setTargetPosition(targetPos);
+                    if (pos > targetPos) {
+                        Pivot.setTargetPosition(targetPos);
+                        Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        Pivot.setPower(0.8);
+
                         return true;
                     } else {
                         return false;
                     }
                 }
             }
-            public Action SlideExtend() {
-                return new SlideExtend();
-            }
-            public Action SlideExtend(int targetposOut) {
-                targetPos = targetposOut;
-                return new SlideExtend();
+            public Action PivotUp() {
+                return new PIVOT.PivotUp();
             }
 
-            public class SlideDown implements Action {
-                private boolean initialized = false;
-
-                @Override
-                public boolean run(@NonNull TelemetryPacket packet) {
-                    if (!initialized) {
-                        slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                        slide.setPower(-0.8);
-                        initialized = true;
-                    }
-
-                    double pos = slide.getCurrentPosition();
-                    packet.put("liftPos", pos);
-                    if (pos > 50.0) {
-                        return true;
-                    } else {
-                        slide.setPower(0);
-                        return false;
-                    }
-                }
-            }
-            public Action SlideDown(){
-                return new SlideDown();
+            public Action PivotUp(int targetposPivot) {
+                targetPos = targetposPivot;
+                return new PIVOT.PivotUp();
             }
         }
+    public class slide {
+        public slide(HardwareMap hardwareMap) {
+            Slide = hardwareMap.get(DcMotor.class, "slide");
+            Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            Slide.setDirection(DcMotorSimple.Direction.FORWARD);
+        }
 
-        public class Claw {
-            private Servo claw;
+        public int targetPos = 1500;
+        private DcMotor Slide;
 
-            public Claw(HardwareMap hardwareMap) {
-                claw = hardwareMap.get(Servo.class, "claw");
-            }
 
-            public class CloseClaw implements Action {
-                @Override
-                public boolean run(@NonNull TelemetryPacket packet) {
-                    claw.setPosition(0.55);
+        public class SlideExtend implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                }
+
+                double pos = Slide.getCurrentPosition();
+                packet.put("slidePos", pos);
+
+                if (pos > targetPos) {
+                    Slide.setTargetPosition(targetPos);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(0.8);
+
+                    return true;
+                } else {
                     return false;
                 }
             }
-            public Action closeClaw() {
-                return new CloseClaw();
-            }
+        }
 
-            public class OpenClaw implements Action {
-                @Override
-                public boolean run(@NonNull TelemetryPacket packet) {
-                    claw.setPosition(1.0);
+        public Action SlideExtend() {
+            return new SlideExtend();
+        }
+
+        public Action SlideExtend(int targetposOut) {
+            targetPos = targetposOut;
+            return new SlideExtend();
+        }
+
+        public class SlideUnExtend implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+
+                    initialized = true;
+                }
+
+                double pos = Slide.getCurrentPosition();
+                packet.put("liftPos", pos);
+                if (pos < -50) {
+                    Slide.setTargetPosition(-40);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(0.8);
+                    return true;
+                } else {
+                    Slide.setPower(0);
                     return false;
                 }
             }
-            public Action openClaw() {
-                return new OpenClaw();
+        }
+        public Action SlideUnExtend() {
+            return new SlideUnExtend();
+        }
+
+
+    }
+
+    public class Elbow {
+        private Servo elbow;
+
+        public Elbow(HardwareMap hardwareMap) {
+            elbow = hardwareMap.get(Servo.class, "elbow");
+        }
+
+        public class elbowFWD1 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                elbow.setPosition(0.45);
+                return false;
             }
         }
+        public Action elbowFWD1() {
+            return new elbowFWD1();
+        }
+
+        public class elbowScore1 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                elbow.setPosition(0.0);
+
+                return false;
+            }
+        }
+        public Action elbowScore1() {
+            return new elbowScore1();
+        }
+    }
+    public class Wrist {
+        private Servo Wrist;
+
+        public Wrist(HardwareMap hardwareMap) {
+            Wrist = hardwareMap.get(Servo.class, "wrist");
+            Wrist.setDirection(Servo.Direction.REVERSE);
+        }
+
+        public class elbowFWD2 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                Wrist.setPosition(0.45);
+                return false;
+            }
+        }
+        public Action elbowFWD2() {
+            return new elbowFWD2();
+        }
+
+        public class elbowScore2 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                Wrist.setPosition(0.0);
+
+                return false;
+            }
+        }
+        public Action elbowScore2() {
+            return new elbowScore2();
+        }
+    }
 
         @Override
         public void runOpMode() {
-            Pose2d initialPose = new Pose2d(11.8, 61.7, Math.toRadians(90));
-            MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
-            Claw claw = new Claw(hardwareMap);
+            Pose2d initialPose = new Pose2d(10.0, -63, Math.toRadians(90));
+            SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, initialPose);
             slide lift = new slide(hardwareMap);
+            PIVOT pivot = new PIVOT(hardwareMap);
+            Elbow Elbow = new Elbow(hardwareMap);
+            Wrist Wrist = new Wrist(hardwareMap);
 
 
             // vision here that outputs position
-            int visionOutputPosition = 1;
 
-            TrajectoryActionBuilder tab1 = drive.actionBuilder(initialPose)
-                    .lineToYSplineHeading(33, Math.toRadians(0))
-                    .waitSeconds(2)
-                    .setTangent(Math.toRadians(90))
-                    .lineToY(48)
-                    .setTangent(Math.toRadians(0))
-                    .lineToX(32)
-                    .strafeTo(new Vector2d(44.5, 30))
-                    .turn(Math.toRadians(180))
-                    .lineToX(47.5)
-                    .waitSeconds(3);
-            TrajectoryActionBuilder tab2 = drive.actionBuilder(initialPose)
-                    .lineToY(37)
-                    .setTangent(Math.toRadians(0))
-                    .lineToX(18)
-                    .waitSeconds(3)
-                    .setTangent(Math.toRadians(0))
-                    .lineToXSplineHeading(46, Math.toRadians(180))
-                    .waitSeconds(3);
-            TrajectoryActionBuilder tab3 = drive.actionBuilder(initialPose)
-                    .lineToYSplineHeading(33, Math.toRadians(180))
-                    .waitSeconds(2)
-                    .strafeTo(new Vector2d(46, 30))
-                    .waitSeconds(3);
-            Action trajectoryActionCloseOut = tab1.fresh()
-                    .strafeTo(new Vector2d(48, 12))
+
+            TrajectoryActionBuilder toChamber = drive.actionBuilder(initialPose)
+                    .lineToY(-34)
+                    .waitSeconds(.5);
+            Action toHP = toChamber.fresh()
+
+                    .strafeTo(new Vector2d(35,-37))
+                    .splineToConstantHeading(new Vector2d(40,-10), Math.toRadians(90))
+                    .waitSeconds(.5)
+                    .setTangent(0)
+                    .lineToXConstantHeading(50)
+                    .waitSeconds(.5)
+                    .lineToYConstantHeading(-55)
+                    .lineToYConstantHeading(-55)
+
                     .build();
 
+            Action wait = toChamber.fresh()
+                    .waitSeconds(1)
+                    .build();
             // actions that need to happen on init; for instance, a claw tightening.
-            Actions.runBlocking(claw.closeClaw());
+            //Actions.runBlocking(claw.closeClaw());
 
 
             while (!isStopRequested() && !opModeIsActive()) {
-                int position = visionOutputPosition;
-                telemetry.addData("Position during Init", position);
                 telemetry.update();
             }
 
-            int startPosition = visionOutputPosition;
-            telemetry.addData("Starting Position", startPosition);
+
+
             telemetry.update();
             waitForStart();
 
             if (isStopRequested()) return;
 
-            Action trajectoryActionChosen;
-            if (startPosition == 1) {
-                trajectoryActionChosen = tab1.build();
-            } else if (startPosition == 2) {
-                trajectoryActionChosen = tab2.build();
-            } else {
-                trajectoryActionChosen = tab3.build();
-            }
 
             Actions.runBlocking(
                     new SequentialAction(
-                            trajectoryActionChosen,
-
-                            lift.SlideExtend(4000),
-                            claw.openClaw(),
-                            lift.SlideDown(),
-                            trajectoryActionCloseOut
+                            new ParallelAction(lift.SlideExtend(-1500), pivot.PivotUp(-3700), Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                            toChamber.build(),
+                            Elbow.elbowScore1(),
+                            Wrist.elbowScore2(),
+                            wait,
+                            lift.SlideUnExtend(),
+                            toHP,
+                            new ParallelAction(Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                            wait
                     )
             );
         }
