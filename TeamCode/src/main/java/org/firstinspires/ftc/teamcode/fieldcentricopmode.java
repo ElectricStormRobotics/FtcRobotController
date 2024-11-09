@@ -98,9 +98,9 @@ public class fieldcentricopmode extends LinearOpMode {
     double two70 =.9;
 
     double maxExten = 3000;
-    boolean armup = false;
+    boolean armup =  false;
 
-    double g = (0.00000000000001); // Slide is all the way down
+    double g = (0.00000000000002); // Slide is all the way down
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
@@ -163,6 +163,9 @@ public class fieldcentricopmode extends LinearOpMode {
         imu.initialize(parameters);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+
+                double threshold = 0;
+                threshold = -DesiredSlideTicks(PIVOT.getCurrentPosition());
 
                 int red = 0xFF;
                 int blue = 0x00;
@@ -278,20 +281,27 @@ public class fieldcentricopmode extends LinearOpMode {
             //DONE WITH DRIVER 1
             if (!armup) {
                 boost = .65;
-                if (Slide.getCurrentPosition() < maxExten) {
+                /*if (Slide.getCurrentPosition() < maxExten) {
                     Slide.setPower(gamepad2.right_stick_y);
                 }
                 else if (Slide.getCurrentPosition() > maxExten && gamepad2.right_stick_y >.1) {
                     Slide.setPower(0);
                 } else if (Slide.getCurrentPosition() > maxExten && gamepad2.right_stick_y < .1) {
                     Slide.setPower(gamepad2.right_stick_y);
-                }
+                }*/
                 elbowup = 0.0;
             }
             if (armup) {
-                Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
+                //Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
                 boost = .25;
                 elbowup = 0.0;
+            }
+            //Limit Switch
+            if (Slide.getCurrentPosition() > threshold){
+                Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
+            }
+            else {
+                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.0005);
             }
                            /**
              * Move robot according to desired axes motions
@@ -340,6 +350,7 @@ public class fieldcentricopmode extends LinearOpMode {
 
                 telemetry.addData("Slide: \n", Slide.getCurrentPosition());
                 telemetry.addData("Pivot: \n", PIVOT.getCurrentPosition());
+                telemetry.addData("threshold", threshold);
 
 
             telemetry.update();
@@ -351,6 +362,25 @@ public class fieldcentricopmode extends LinearOpMode {
             // Show the elapsed game time and wheel power.
             telemetry.update();
         }
+
+        public double DesiredSlideTicks(int PivotPos) {
+            double DesiredSlideTicks = 0;
+
+            double PivotAngle = PivotPos / 80; // Ticks per degree
+
+            if (PivotAngle < 90) {
+                //36 is max horizontal extension
+                DesiredSlideTicks =  22 / (Math.cos(Math.toRadians(PivotAngle))) * 300.439898; //Ticks per inch
+            } else {
+                DesiredSlideTicks = -10000;
+            }
+
+            return DesiredSlideTicks;
+
+
+
+        }
     }
+
 
 
