@@ -95,7 +95,7 @@ public class fieldcentricopmode extends LinearOpMode {
     double zeroFlip = 0.32;
     double ninetyDe = 0.0;
     double one80 = .65;
-    double two70 =.9;
+    double two70 = 1.0;
 
     double maxExten = -6000;
     boolean armup =  false;
@@ -237,11 +237,11 @@ public class fieldcentricopmode extends LinearOpMode {
             //TODO Code All da Arm Stuff
 
             // Intake
-            if (gamepad1.a) {
+            if (gamepad1.right_bumper) {
                 left_CR.setPower(1);
                 right_CR.setPower(1);
 
-            } else if (gamepad1.b) {
+            } else if (gamepad1.left_bumper) {
                 left_CR.setPower(-1);
                 right_CR.setPower(-1);
 
@@ -252,20 +252,24 @@ public class fieldcentricopmode extends LinearOpMode {
             // Driver 2 controls
 
             // Elbow
-          /*  if (gamepad2.dpad_down && PivotAngle > 45 ) {
+            if (gamepad2.dpad_down && Slide.getCurrentPosition() > -4800 ) {
                 elbow.setPosition(elbowdown);
                 wrist.setPosition(elbowdown);
             }
 
-            if (gamepad2.dpad_up && PivotAngle > 45) {
+            if (gamepad2.dpad_up && Slide.getCurrentPosition() > -4800) {
                 elbow.setPosition(elbowup);
                 wrist.setPosition(elbowup);
             }
 
-           */
-            if (gamepad2.dpad_up) {
+
+            if (gamepad2.y) {
                 elbow.setPosition(elbowup);
                 wrist.setPosition(elbowup);
+            }
+            if (gamepad2.a) {
+                elbow.setPosition(elbowdown);
+                wrist.setPosition(elbowdown);
             }
 
             //Twist/wrist
@@ -283,7 +287,7 @@ public class fieldcentricopmode extends LinearOpMode {
             }
 
             //Arm Code
-            if(PIVOT.getCurrentPosition() < -5000) {
+            if(PIVOT.getCurrentPosition() < -4500) {
                 armup = true;
             }
             else{
@@ -307,7 +311,7 @@ public class fieldcentricopmode extends LinearOpMode {
             if (armup) {
                 //Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
                 boost = .25;
-                elbowup = 0.0;
+                elbowup = 0.2;
                 maxExten = -8000;
             }
             //Limit Switch

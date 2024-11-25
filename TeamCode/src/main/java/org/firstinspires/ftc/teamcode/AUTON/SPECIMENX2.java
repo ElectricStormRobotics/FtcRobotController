@@ -12,10 +12,10 @@ import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -24,8 +24,9 @@ import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
 
 
 @Config
-    @Autonomous(name = "Specimen w/ Block Pushing", group = "Autonomous")
-    public class BASICAUTON extends LinearOpMode {
+    @Autonomous(name = "Specimen x 2", group = "Autonomous")
+//@Disabled
+    public class SPECIMENX2 extends LinearOpMode {
         public class PIVOT {
             private DcMotor Pivot;
             int targetPos = 1500;
@@ -36,7 +37,37 @@ import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
                 Pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 Pivot.setDirection(DcMotorSimple.Direction.FORWARD);
             }
+            public class PivotDown implements Action {
+                private boolean initialized = false;
 
+                @Override
+                public boolean run(@NonNull TelemetryPacket packet) {
+                    if (!initialized) {
+                        initialized = true;
+                    }
+
+                    double pos = Pivot.getCurrentPosition();
+                    packet.put("pivotPos", pos);
+
+                    if (pos > targetPos) {
+                        Pivot.setTargetPosition(targetPos);
+                        Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                        Pivot.setPower(0.8);
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            public Action PivotDown() {
+                return new PivotDown();
+            }
+
+            public Action PivotDown(int targetposPivot) {
+                targetPos = targetposPivot;
+                return new PivotDown();
+            }
 
             public class PivotUp implements Action {
                 private boolean initialized = false;
@@ -62,13 +93,14 @@ import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
                 }
             }
             public Action PivotUp() {
-                return new PIVOT.PivotUp();
+                return new PivotUp();
             }
 
             public Action PivotUp(int targetposPivot) {
                 targetPos = targetposPivot;
-                return new PIVOT.PivotUp();
+                return new PivotUp();
             }
+
         }
     public class slide {
         public slide(HardwareMap hardwareMap) {
@@ -337,64 +369,55 @@ import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
 
         // vision here that outputs position
 
+        TrajectoryActionBuilder toChamber = drive.actionBuilder(initialPose)
+                .lineToY(-34)
+                .waitSeconds(.5);
+        Action toHP = toChamber.fresh()
 
-            TrajectoryActionBuilder toChamber = drive.actionBuilder(initialPose)
-                    .lineToY(-34)
-                    .waitSeconds(.5);
+                .strafeTo(new Vector2d(35,-37))
+                .splineToConstantHeading(new Vector2d(40,-10), Math.toRadians(90))
+                .waitSeconds(.5)
+                .setTangent(0)
+                .lineToXConstantHeading(50)
+                .waitSeconds(.5)
+                .lineToYConstantHeading(-55)
+                .strafeTo(new Vector2d(50, -15))
+                .strafeTo(new Vector2d(60, -12))
+                .strafeTo(new Vector2d(60, -55))
 
-            TrajectoryActionBuilder toHP = toChamber.fresh()
-                    .strafeTo(new Vector2d(35, -40))
-                    .turnTo(Math.toRadians(270))
-                    .strafeTo(new Vector2d(35, -50))
-                    .waitSeconds(1)
-                    .lineToY(-63);
+                .build();
 
-            TrajectoryActionBuilder toChamber2 = toHP.fresh()
-                    .strafeTo(new Vector2d(10, -40))
-                    .turnTo(Math.toRadians(90))
-                    .lineToY(-34);
-
-
-
-
-            Action park = toChamber2.fresh()
-                    .strafeTo(new Vector2d(60, -50))
-                    .build();
-
-            Action wait = toChamber.fresh()
-                    .waitSeconds(1)
-                    .build();
-            // actions that need to happen on init; for instance, a claw tightening.
-            //Actions.runBlocking(claw.closeClaw());
+        Action wait = toChamber.fresh()
+                .waitSeconds(1)
+                .build();
+        // actions that need to happen on init; for instance, a claw tightening.
+        //Actions.runBlocking(claw.closeClaw());
 
 
-            while (!isStopRequested() && !opModeIsActive()) {
-                telemetry.update();
-            }
-
-
-
+        while (!isStopRequested() && !opModeIsActive()) {
             telemetry.update();
-            waitForStart();
-
-            if (isStopRequested()) return;
-
-
-            Actions.runBlocking(
-                    new SequentialAction(
-                            new ParallelAction(lift.SlideExtend(-1700), pivot.PivotUp(-3900), Elbow.elbowFWD1(), Wrist.elbowFWD2()),
-                            toChamber.build(),
-                            Elbow.elbowScore1(),
-                            Wrist.elbowScore2(),
-                            wait,
-                            lift.SlideUnExtend(),
-                            toHP.build(),
-                            new ParallelAction(pivot.PivotUp(-3700), right_CR.IN2(),left_CR.IN1()),
-                            toChamber2.build(),
-
-                            park
-                    )
-            );
         }
-    }
 
+
+
+        telemetry.update();
+        waitForStart();
+
+        if (isStopRequested()) return;
+
+
+        Actions.runBlocking(
+                new SequentialAction(
+                        new ParallelAction(lift.SlideExtend(-1500), pivot.PivotUp(-3700), Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                        toChamber.build(),
+                        Elbow.elbowScore1(),
+                        Wrist.elbowScore2(),
+                        wait,
+                        lift.SlideUnExtend(),
+                        toHP,
+                        new ParallelAction(Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                        wait
+                )
+        );
+    }
+}
