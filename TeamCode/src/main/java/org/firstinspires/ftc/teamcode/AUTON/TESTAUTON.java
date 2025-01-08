@@ -5,15 +5,11 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.AngularVelConstraint;
-import com.acmerobotics.roadrunner.MinVelConstraint;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -26,88 +22,87 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
 
-import java.util.Arrays;
-
 
 @Config
-    @Autonomous(name = "Specimen x 2", group = "Autonomous")
-//@Disabled
-    public class SPECIMENX2 extends LinearOpMode {
-        public class PIVOT {
-            private DcMotor Pivot;
-            int targetPos = 1500;
-            public PIVOT(HardwareMap hardwareMap) {
-                Pivot = hardwareMap.get(DcMotor.class, "PIVOT");
-                Pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                Pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                Pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                Pivot.setDirection(DcMotorSimple.Direction.FORWARD);
-            }
-            public class PivotDown implements Action {
-                private boolean initialized = false;
-
-                @Override
-                public boolean run(@NonNull TelemetryPacket packet) {
-                    if (!initialized) {
-                        initialized = true;
-                    }
-
-                    double pos = Pivot.getCurrentPosition();
-                    packet.put("pivotPos", pos);
-
-                    if (pos > targetPos) {
-                        Pivot.setTargetPosition(targetPos);
-                        Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        Pivot.setPower(0.8);
-
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            }
-            public Action PivotDown() {
-                return new PivotDown();
-            }
-
-            public Action PivotDown(int targetposPivot) {
-                targetPos = targetposPivot;
-                return new PivotDown();
-            }
-
-            public class PivotUp implements Action {
-                private boolean initialized = false;
-
-                @Override
-                public boolean run(@NonNull TelemetryPacket packet) {
-                    if (!initialized) {
-                        initialized = true;
-                    }
-
-                    double pos = Pivot.getCurrentPosition();
-                    packet.put("pivotPos", pos);
-
-                    if (pos > targetPos) {
-                        Pivot.setTargetPosition(targetPos);
-                        Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        Pivot.setPower(0.8);
-
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
-            }
-            public Action PivotUp() {
-                return new PivotUp();
-            }
-
-            public Action PivotUp(int targetposPivot) {
-                targetPos = targetposPivot;
-                return new PivotUp();
-            }
-
+@Autonomous(name = "TestPickup", group = "Autonomous")
+@Disabled
+public class TESTAUTON extends LinearOpMode {
+    public class PIVOT {
+        private DcMotor Pivot;
+        int targetPos = 1500;
+        public PIVOT(HardwareMap hardwareMap) {
+            Pivot = hardwareMap.get(DcMotor.class, "PIVOT");
+            Pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            Pivot.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            Pivot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            Pivot.setDirection(DcMotorSimple.Direction.FORWARD);
         }
+        public class PivotDown implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                }
+
+                double pos = Pivot.getCurrentPosition();
+                packet.put("pivotPos", pos);
+
+                if (pos > targetPos) {
+                    Pivot.setTargetPosition(targetPos);
+                    Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Pivot.setPower(0.8);
+
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        public Action PivotDown() {
+            return new PivotDown();
+        }
+
+        public Action PivotDown(int targetposPivot) {
+            targetPos = targetposPivot;
+            return new PivotDown();
+        }
+
+        public class PivotUp implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+                    initialized = true;
+                }
+
+                double pos = Pivot.getCurrentPosition();
+                packet.put("pivotPos", pos);
+
+                if (pos > targetPos) {
+                    Pivot.setTargetPosition(targetPos);
+                    Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Pivot.setPower(0.8);
+
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        public Action PivotUp() {
+            return new PivotUp();
+        }
+
+        public Action PivotUp(int targetposPivot) {
+            targetPos = targetposPivot;
+            return new PivotUp();
+        }
+
+    }
+
     public class slide {
         public slide(HardwareMap hardwareMap) {
             Slide = hardwareMap.get(DcMotor.class, "slide");
@@ -358,65 +353,56 @@ import java.util.Arrays;
             return new ninetyDe();
         }
     }
-        public static double V_MEDIUM = 15;
-        public static double R_SLOW = 1.5;
 
     @Override
-        public void runOpMode() {
-            Pose2d initialPose = new Pose2d(10.0, -63, Math.toRadians(90));
-            SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, initialPose);
-            slide lift = new slide(hardwareMap);
-            PIVOT pivot = new PIVOT(hardwareMap);
-            Elbow Elbow = new Elbow(hardwareMap);
-            Wrist Wrist = new Wrist(hardwareMap);
-            TWIST twist = new TWIST(hardwareMap);
-            IntakeR right_CR = new IntakeR(hardwareMap);
-            IntakeL left_CR = new IntakeL(hardwareMap);
-
-            //Set Velocity Constraint to slow things down
-        VelConstraint medium = new MinVelConstraint(Arrays.asList(
-                new TranslationalVelConstraint(V_MEDIUM),
-                new AngularVelConstraint(R_SLOW)
-        ));
+    public void runOpMode() {
+        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(90));
+        SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, initialPose);
+        //slide lift = new slide(hardwareMap);
+        LIFTC Slide = new LIFTC(hardwareMap);
+        PIVOTC pivot = new PIVOTC(hardwareMap);
+        Elbow Elbow = new Elbow(hardwareMap);
+        Wrist Wrist = new Wrist(hardwareMap);
+        TWIST twist = new TWIST(hardwareMap);
+        IntakeR right_CR = new IntakeR(hardwareMap);
+        IntakeL left_CR = new IntakeL(hardwareMap);
 
 
 
         // vision here that outputs position
 
-        TrajectoryActionBuilder toChamber = drive.actionBuilder(initialPose)
-                .lineToY(-36)
+        TrajectoryActionBuilder Pickup = drive.actionBuilder(initialPose)
+
+                .strafeTo(new Vector2d(0, 7))
                 .waitSeconds(.5);
-        Action toHP = toChamber.fresh()
+        TrajectoryActionBuilder toBucket = Pickup.fresh()
 
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(25, -37, Math.toRadians(270)), Math.toRadians(0),medium)
-                .waitSeconds(.5)
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(28, -15, Math.toRadians(270)), Math.toRadians(0))
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(30, -10, Math.toRadians(270)), Math.toRadians(0))
-                .waitSeconds(.5)
-                .lineToY(-55)
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(10, -34, Math.toRadians(90)), Math.toRadians(0))
-                /*
-                .strafeTo(new Vector2d(50, -15))
-                .strafeTo(new Vector2d(60, -12))
-                .strafeTo(new Vector2d(60, -55))
-                 */
+                .setTangent(90)
+                .splineToLinearHeading(new Pose2d(-13, -45, Math.toRadians(45)), Math.toRadians(90))
+                .setTangent(90)
+                .splineToLinearHeading(new Pose2d(-60, -56, Math.toRadians(45)), Math.toRadians(180))
+                .setTangent(90)
+                .splineToLinearHeading(new Pose2d(-64, -56, Math.toRadians(90)), Math.toRadians(0))
+                .waitSeconds(2);
 
-                .build();
+        TrajectoryActionBuilder Pickup1 = toBucket.fresh()
 
-        Action wait = toChamber.fresh()
+                .splineToLinearHeading(new Pose2d(-60, -56, Math.toRadians(45)), Math.toRadians(180))
+                .waitSeconds(2)
+                .splineToLinearHeading(new Pose2d(-60, -56, Math.toRadians(75)), Math.toRadians(180))
+                .waitSeconds(2)
+                .splineToLinearHeading(new Pose2d(-60, -56, Math.toRadians(45)), Math.toRadians(180))
+                .waitSeconds(2)
+                .splineToLinearHeading(new Pose2d(-60, -56, Math.toRadians(115)), Math.toRadians(180))
+                .waitSeconds(2)
+                .splineToLinearHeading(new Pose2d(-60, -54, Math.toRadians(45)), Math.toRadians(180))
+                .waitSeconds(2);
+
+        Action wait = Pickup.fresh()
                 .waitSeconds(1)
                 .build();
         // actions that need to happen on init; for instance, a claw tightening.
         //Actions.runBlocking(claw.closeClaw());
-
-
-
-
-
 
 
         while (!isStopRequested() && !opModeIsActive()) {
@@ -433,14 +419,9 @@ import java.util.Arrays;
 
         Actions.runBlocking(
                 new SequentialAction(
-                        new ParallelAction(lift.SlideExtend(-1500), pivot.PivotUp(-3700), Elbow.elbowFWD1(), Wrist.elbowFWD2()),
-                        toChamber.build(),
-                        Elbow.elbowScore1(),
-                        Wrist.elbowScore2(),
-                        wait,
-                        lift.SlideUnExtend(),
-                        toHP,
-                        new ParallelAction(Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                        new ParallelAction(Slide.dMoveSlide(-100), pivot.dMovePivot(-800), Elbow.elbowDown1(), Wrist.elbowDown2(), twist.ninetyDe()),
+                        new ParallelAction(Pickup.build(), left_CR.IN1(), right_CR.IN2()),
+
                         wait
                 )
         );

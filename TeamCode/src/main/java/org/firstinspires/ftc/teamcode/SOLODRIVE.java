@@ -30,21 +30,17 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-
-
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-
-import java.util.ServiceLoader;
 
 
 /*
@@ -60,9 +56,9 @@ import java.util.ServiceLoader;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Into daDeep", group="Linear OpMode")
-//@Disabled
-public class fieldcentricopmode extends LinearOpMode {
+@TeleOp(name="FREEBIRD", group="Linear OpMode")
+@Disabled
+public class SOLODRIVE extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
@@ -275,28 +271,28 @@ public class fieldcentricopmode extends LinearOpMode {
             }
 
 
-            if (gamepad2.y) {
+            if (gamepad1.y) {
                 elbow.setPosition(elbowup);
                 wrist.setPosition(elbowup);
             }
-            if (gamepad2.a) {
+            if (gamepad1.a) {
                 elbow.setPosition(elbowdown);
                 wrist.setPosition(elbowdown);
             }
 
             //Twist/wrist
-            if (gamepad2.left_bumper && !gamepad2.right_bumper) {
-                twist.setPosition(ninetyDe);
-            }
-            else if (gamepad2.right_bumper && !gamepad2.left_bumper) {
+           if (gamepad1.right_trigger > .1 && gamepad1.left_trigger < .1) {
+               twist.setPosition(ninetyDe);
+           }
+            else if (gamepad1.right_trigger < .1 && gamepad1.left_trigger > .1) {
                 twist.setPosition(one80);
             }
-            else if (gamepad2.right_bumper && gamepad2.left_bumper) {
+            else if (gamepad1.right_trigger > .1 && gamepad1.left_trigger > .1) {
                 twist.setPosition(two70);
             }
             else {
                 twist.setPosition(zeroFlip);
-            }
+           }
 
             //Arm Code
             if(PIVOT.getCurrentPosition() < -4500) {

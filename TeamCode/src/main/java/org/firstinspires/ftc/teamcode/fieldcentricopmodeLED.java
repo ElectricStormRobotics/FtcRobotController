@@ -29,22 +29,24 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.arcrobotics.ftclib.controller.PIDController;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
-import java.util.ServiceLoader;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 /*
@@ -60,13 +62,13 @@ import java.util.ServiceLoader;
  * Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@TeleOp(name="Into daDeep", group="Linear OpMode")
+@TeleOp(name="LEDDEEP", group="Linear OpMode")
 //@Disabled
-public class fieldcentricopmode extends LinearOpMode {
+public class fieldcentricopmodeLED extends LinearOpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    //private ElapsedTime ledtimer = new ElapsedTime();
+    private ElapsedTime ledtimer = new ElapsedTime();
     private DcMotor Front_Right = null;  //  Used to control the left front drive wheel
     private DcMotor Front_Left = null;  //  Used to control the right front drive wheel
     private DcMotor Back_Left = null;  //  Used to control the left back drive wheel
@@ -79,7 +81,7 @@ public class fieldcentricopmode extends LinearOpMode {
     private Servo wrist = null; // Brings Arm attachment up and down
 
     private Servo twist = null; // Twists Intake
-    private Servo subclear = null; // Subclear Intake
+  //  private Servo subclear = null; // Subclear Intake
 
     private CRServo right_CR; //Right Intake wheel
     private CRServo left_CR; //Left Intake wheel
@@ -87,9 +89,9 @@ public class fieldcentricopmode extends LinearOpMode {
     // private neopixel_i2c LED_strip;
    // private boolean led_race=true;
 
-    //private boolean led_off = true;
-    //private boolean end_game = false;
-    //private int pix_on = 3; //sets all leds on (2 sets every other, 3 sets every 3rd)
+   // private boolean led_off = true;
+    private boolean end_game = false;
+    private int pix_on = 3; //sets all leds on (2 sets every other, 3 sets every 3rd)
     double boost = 0.45;
     double elbowdown = 0.6;
     double elbowup = 0.0;
@@ -98,9 +100,24 @@ public class fieldcentricopmode extends LinearOpMode {
     double one80 = .65;
     double two70 = 1.0;
 
+    boolean LT90 = true;
+    boolean GT90 = true;
+    boolean GT108 = true;
+    boolean ILT = true;
     double maxExten = -6000;
     boolean armup =  false;
-
+    private PIDController SlideController;
+    public static double pS = 0.008, iS = 0, dS = 0.000005;
+    public static double f = 0;
+    private PIDController armController;
+    public static double pA = 0.005, iA = 0, dA = 0;
+    public static int TargetSlide = -1400;
+    private int SLIDE_RIGHTSTICK_BUTTON = -1400;
+    private int SLIDE_LEFTSTICK_BUTTON = -1100;
+    public static int TargetArm = -2000;
+    private int ARM_RIGHTSTICK_BUTTON = -400;
+    private int ARM_LEFTSTICK_BUTTON = -3700;
+    boolean DIRECTION = true;
     double g = (0.000000000001); // Slide is all the way down
     @Override
     public void runOpMode() {
@@ -121,12 +138,10 @@ public class fieldcentricopmode extends LinearOpMode {
         wrist = hardwareMap.get(Servo.class, "wrist");
         elbow = hardwareMap.get(Servo.class, "elbow");
         twist = hardwareMap.get(Servo.class, "twist");
-        subclear = hardwareMap.get(Servo.class, "subclear");
+         //LED_strip  = hardwareMap.get(neopixel_i2c.class, "led_strip");
 
-
-
-
-        // LED_strip  = hardwareMap.get(neopixel_i2c.class, "led_strip");
+        armController = new PIDController(pA, iA, dA);
+        SlideController = new PIDController(pS, iS, dS);
         // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
         // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
         // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
@@ -147,92 +162,82 @@ public class fieldcentricopmode extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
 
 
-        int led_countdown = 0;
-        int num_pixels = 300; // number of pixels (LEDs) in to work with.
+      //  int led_countdown = 0;
+      //  int num_pixels = 300; // number of pixels (LEDs) in to work with.
 
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        //
+        List<LynxModule> allHubs = hardwareMap.getAll(LynxModule.class);
+
+        for (LynxModule hub : allHubs) {
+            hub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+        }
 
         waitForStart();
         elbow.setPosition(0);
         wrist.setPosition(0);
         twist.setPosition(zeroFlip);
         runtime.reset();
-        //ledtimer.reset();
+        // ledtimer.reset();
         IMU imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.RIGHT,
                 RevHubOrientationOnRobot.UsbFacingDirection.UP));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
-       // LED_strip.doInitialize();
+      //  LED_strip.doInitialize();
         imu.initialize(parameters);
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
-            double PivotAngle = PIVOT.getCurrentPosition() / 80; // Ticks per degree
 
-
-            double threshold = 0;
-                threshold = -DesiredSlideTicks(PIVOT.getCurrentPosition());
 
                 int red = 0xFF;
                 int blue = 0x00;
                 int green = 0x00;
+
+            armController.setPID(pA, iA, dA);
+            SlideController.setPID(pS, iS, dS);
+            int currentPIVOTPOS = PIVOT.getCurrentPosition();
+            int currentSlidePOS = Slide.getCurrentPosition();
+            double PivotAngle = currentPIVOTPOS / 80; // Ticks per degree
+
+
+            double threshold = 0;
+            threshold = -DesiredSlideTicks(currentPIVOTPOS);
 /*
+
                 // Doesn't need to be the whole strip, but needs to be all the LEDs planned to be used
-                if((runtime.seconds()%60)>= 59)// reset to off
-                {
-                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0x00, 0x00,pix_on);
-                    led_countdown = 0;
-                    telemetry.addData("","60 seconds");
-                    telemetry.update();
-                }
-
-                else if((runtime.seconds()%60)> 50 && led_countdown<5)// 50 secs teal
-                {
-                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0xFF, 0xff,pix_on);
-                    led_countdown = 5;
-                    telemetry.addData("","50 seconds");
-                    telemetry.update();
-                }
-
-                else if((runtime.seconds()%60)> 40 && led_countdown<4)// 40 secs yellow
-                {
-                    LED_strip.writeLEDstrip(num_pixels, 0xFF, 0xFF, 0x00,pix_on);
-                    led_countdown = 4;
-                    telemetry.addData("","40 seconds");
-                    telemetry.update();
-                }
-
-                else if((runtime.seconds()%60)> 30 && led_countdown<3)// 30 seconds red
-                {
-                    LED_strip.writeLEDstrip(num_pixels, 0xFF, 0x00, 0x00,pix_on);
-                    led_countdown = 3;
-                    telemetry.addData("","30 seconds");
-                    telemetry.update();
-                }
-                else if ((runtime.seconds()%60)> 20 && led_countdown<2)//20 seconds blue
-                // sets lights to blue
-                {
-                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0x00, 0xff,pix_on);
-                    led_countdown = 2;
-                    telemetry.addData("","25 seconds");
-                    telemetry.update();
-                }
-                else if ((runtime.seconds()%60)> 10 && led_countdown<1)//10 secs green
-                // sets lights to green
-                {
-                    LED_strip.writeLEDstrip(num_pixels, 0x00, 0xff, 0x00,pix_on);
-                    led_countdown = 1;
-                    telemetry.addData("","15 seconds");
-                    telemetry.update();
-                }
-                else {}
+            if (runtime.time(TimeUnit.SECONDS) <= 59 && LT90==true) {
+                LED_strip.writeLEDstrip(num_pixels, 0xFF, 0x00, 0x00,3);  //GREEN
+                LT90 = false;
+            }
+            // regular match color
+            else if (runtime.time(TimeUnit.SECONDS) >= 60 && GT90==true) {
+                LED_strip.writeLEDstrip(num_pixels, 0x38, 0xBC, 0x23, 3); // BLOOD ORANGE
+                GT90 = false;
+            }
+            else if (runtime.time(TimeUnit.SECONDS) > 90 && GT90==true) {
+                LED_strip.writeLEDstrip(num_pixels, 0x38, 0xBC, 0x23, 3); // BLOOD ORANGE
+                GT90 = false;
+            }
+            else if (runtime.time(TimeUnit.SECONDS) > 108 && GT108==true) {
+                LED_strip.writeLEDstrip(num_pixels, 0x00, 0xFF, 0x00, 3); // RED
+                GT108 = false;
+            }
+            else if (runtime.time(TimeUnit.SECONDS) < 90 && ILT && DIRECTION) {
+                LED_strip.writeLEDstrip(num_pixels, 0x00, 0x80, 0x80,3); // PURPLE
+                ILT = false;
+            }
+            else if (runtime.time(TimeUnit.SECONDS) < 90 && ILT && !DIRECTION) {
+                LED_strip.writeLEDstrip(num_pixels, 0xff, 0xff, 0x00, 3); // YELLOW
+                ILT = false;
+            }
 
 
-                // telemetry.addData("Status", "LED Timer: " + ledtimer.toString());
+                telemetry.addData("Status", "LED Timer: " + ledtimer.toString());
                 telemetry.addData("Status", "Run Time: " + runtime.toString());
                 telemetry.update();
-            }
 
 
  */
@@ -243,33 +248,50 @@ public class fieldcentricopmode extends LinearOpMode {
             if (gamepad1.right_bumper) {
                 left_CR.setPower(1);
                 right_CR.setPower(1);
+                DIRECTION = true;
+                ILT = true;
 
             } else if (gamepad1.left_bumper) {
                 left_CR.setPower(-1);
                 right_CR.setPower(-1);
+                DIRECTION = false;
+                ILT = true;
 
             } else {
                 left_CR.setPower(0);
                 right_CR.setPower(0);
             }
 
-            //subclear
-            if (gamepad1.dpad_left) {
-                subclear.setPosition(0.0);
-            }
-            if (gamepad1.dpad_right) {
-                subclear.setPosition(0.3);
-            }
+            /*
+            if (gamepad1.right_bumper) {
+                left_CR.setPower(1);
+                right_CR.setPower(1);
+                DIRECTION = true;
+                ILT = true;
 
+            }
+            if (gamepad1.left_bumper) {
+                left_CR.setPower(-1);
+                right_CR.setPower(-1);
+                DIRECTION = false;
+                ILT = true;
+
+            }
+            if (gamepad1.left_bumper && gamepad1.left_bumper) {
+                left_CR.setPower(0);
+                right_CR.setPower(0);
+                ILT = false;
+            }
+             */
             // Driver 2 controls
 
             // Elbow
-            if (gamepad2.dpad_down && Slide.getCurrentPosition() > -4800 ) {
+            if (gamepad2.dpad_down && currentSlidePOS > -4800 ) {
                 elbow.setPosition(elbowdown);
                 wrist.setPosition(elbowdown);
             }
 
-            if (gamepad2.dpad_up && Slide.getCurrentPosition() > -4800) {
+            if (gamepad2.dpad_up && currentSlidePOS > -4800) {
                 elbow.setPosition(elbowup);
                 wrist.setPosition(elbowup);
             }
@@ -298,8 +320,49 @@ public class fieldcentricopmode extends LinearOpMode {
                 twist.setPosition(zeroFlip);
             }
 
+            if (Math.abs(gamepad2.right_stick_y) > 0.05) {
+                if (currentSlidePOS > threshold){
+                    Slide.setPower(gamepad2.right_stick_y);
+                }
+                else {
+                    Slide.setPower(.1+(threshold-currentSlidePOS)*.001);
+                }
+                TargetSlide = Slide.getCurrentPosition();
+            }
+            else {
+                double ff = (Math.sin(Math.toRadians(PivotAngle)) * f * currentSlidePOS);
+                double SlidePower = SlideController.calculate(currentSlidePOS, TargetSlide);
+                Slide.setPower(SlidePower + ff);
+            }
+
+
+
+
+            //PIVOT CONTROLS
+            if (Math.abs(gamepad2.left_stick_y) > 0.05) {
+                PIVOT.setPower(gamepad2.left_stick_y);
+                TargetArm = PIVOT.getCurrentPosition();
+            }
+            else {
+                double ArmPower = armController.calculate(currentPIVOTPOS, TargetArm);
+                PIVOT.setPower(ArmPower);
+            }
+            //PICKUP POSITION
+            if(gamepad2.right_stick_button) {
+                TargetArm = ARM_RIGHTSTICK_BUTTON;
+                TargetSlide = SLIDE_RIGHTSTICK_BUTTON;
+                elbow.setPosition(elbowdown);
+                wrist.setPosition(elbowdown);
+            }
+            //SCORING POSITION
+            if(gamepad2.left_stick_button) {
+                TargetArm = ARM_LEFTSTICK_BUTTON;
+                TargetSlide = SLIDE_LEFTSTICK_BUTTON;
+                elbow.setPosition(.45);
+                wrist.setPosition(.45);
+            }
             //Arm Code
-            if(PIVOT.getCurrentPosition() < -4500) {
+            if(currentPIVOTPOS < -4500) {
                 armup = true;
             }
             else{
@@ -321,18 +384,12 @@ public class fieldcentricopmode extends LinearOpMode {
                 elbowup = 0.0;
             }
             if (armup) {
-                //Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
+                //Slide.setPower(gamepad2.right_stick_y + (g+ * Slide.getCurrentPosition()));
                 boost = .25;
                 elbowup = 0.2;
                 maxExten = -8000;
             }
-            //Limit Switch
-            if (Slide.getCurrentPosition() > threshold){
-                Slide.setPower(gamepad2.right_stick_y + (g * Slide.getCurrentPosition()));
-            }
-            else {
-                Slide.setPower(.1+(threshold-Slide.getCurrentPosition())*.001);
-            }
+
                            /**
              * Move robot according to desired axes motions
              * <p>
@@ -376,10 +433,9 @@ public class fieldcentricopmode extends LinearOpMode {
                 Back_Left.setPower(backLeftPower);
                 Front_Right.setPower(frontRightPower);
                 Back_Right.setPower(backRightPower);
-                PIVOT.setPower(gamepad2.left_stick_y);
 
-                telemetry.addData("Slide: \n", Slide.getCurrentPosition());
-                telemetry.addData("Pivot: \n", PIVOT.getCurrentPosition());
+                telemetry.addData("Slide: \n", currentSlidePOS);
+                telemetry.addData("Pivot: \n", currentPIVOTPOS);
                 telemetry.addData("threshold", threshold);
 
 

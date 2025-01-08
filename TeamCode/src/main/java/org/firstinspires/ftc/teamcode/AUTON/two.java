@@ -16,7 +16,6 @@ import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.VelConstraint;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -24,18 +23,21 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.AUTON.LIFTC;
+import org.firstinspires.ftc.teamcode.AUTON.PIVOTC;
 import org.firstinspires.ftc.teamcode.SparkFunOTOSDrive;
 
 import java.util.Arrays;
 
 
 @Config
-    @Autonomous(name = "Specimen x 2", group = "Autonomous")
+    @Autonomous(name = "twoSpec+push2", group = "Autonomous")
 //@Disabled
-    public class SPECIMENX2 extends LinearOpMode {
+    public class two extends LinearOpMode {
         public class PIVOT {
             private DcMotor Pivot;
-            int targetPos = 1500;
+            int targetPosUp = 1500;
+            int targetPosDown = -4000;
             public PIVOT(HardwareMap hardwareMap) {
                 Pivot = hardwareMap.get(DcMotor.class, "PIVOT");
                 Pivot.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -55,13 +57,14 @@ import java.util.Arrays;
                     double pos = Pivot.getCurrentPosition();
                     packet.put("pivotPos", pos);
 
-                    if (pos > targetPos) {
-                        Pivot.setTargetPosition(targetPos);
+                    if (pos < targetPosDown) {
+                        Pivot.setTargetPosition(targetPosDown);
                         Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                         Pivot.setPower(0.8);
 
                         return true;
                     } else {
+                        Pivot.setPower(0);
                         return false;
                     }
                 }
@@ -70,8 +73,8 @@ import java.util.Arrays;
                 return new PivotDown();
             }
 
-            public Action PivotDown(int targetposPivot) {
-                targetPos = targetposPivot;
+            public Action PivotDown(int targetposPivot1) {
+                targetPosDown = targetposPivot1;
                 return new PivotDown();
             }
 
@@ -87,13 +90,14 @@ import java.util.Arrays;
                     double pos = Pivot.getCurrentPosition();
                     packet.put("pivotPos", pos);
 
-                    if (pos > targetPos) {
-                        Pivot.setTargetPosition(targetPos);
+                    if (pos > targetPosUp) {
+                        Pivot.setTargetPosition(targetPosUp);
                         Pivot.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                        Pivot.setPower(0.8);
+                        Pivot.setPower(0.9);
 
                         return true;
                     } else {
+                        Pivot.setPower(0);
                         return false;
                     }
                 }
@@ -103,7 +107,7 @@ import java.util.Arrays;
             }
 
             public Action PivotUp(int targetposPivot) {
-                targetPos = targetposPivot;
+                targetPosUp = targetposPivot;
                 return new PivotUp();
             }
 
@@ -119,6 +123,7 @@ import java.util.Arrays;
 
         public int targetPos = 1500;
         private DcMotor Slide;
+
 
 
         public class SlideExtend implements Action {
@@ -140,6 +145,7 @@ import java.util.Arrays;
 
                     return true;
                 } else {
+                    Slide.setPower(0);
                     return false;
                 }
             }
@@ -154,7 +160,7 @@ import java.util.Arrays;
             return new SlideExtend();
         }
 
-        public class SlideUnExtend implements Action {
+        public class Slide0 implements Action {
             private boolean initialized = false;
 
             @Override
@@ -167,7 +173,34 @@ import java.util.Arrays;
                 double pos = Slide.getCurrentPosition();
                 packet.put("liftPos", pos);
                 if (pos < -50) {
-                    Slide.setTargetPosition(-40);
+                    Slide.setTargetPosition(0);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(0.8);
+                    return true;
+                } else {
+                    Slide.setPower(0);
+                    return false;
+                }
+            }
+        }
+        public Action Slide0() {
+            return new Slide0();
+        }
+        public class SlideUnExtend implements Action {
+            private boolean initialized = false;
+
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+
+                    initialized = true;
+                }
+
+                double pos = Slide.getCurrentPosition();
+
+                packet.put("liftPos", pos);
+                if (pos < 0) {
+                    Slide.setTargetPosition(0);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(0.8);
                     return true;
@@ -180,7 +213,32 @@ import java.util.Arrays;
         public Action SlideUnExtend() {
             return new SlideUnExtend();
         }
+        public class SlideScore implements Action {
+            private boolean initialized = false;
 
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+
+                    initialized = true;
+                }
+
+                double pos = Slide.getCurrentPosition();
+                packet.put("liftPos", pos);
+                if (pos > -50) {
+                    Slide.setTargetPosition(-2000);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(0.8);
+                    return true;
+                } else {
+                    Slide.setPower(0);
+                    return false;
+                }
+            }
+        }
+        public Action SlideScore() {
+            return new SlideScore();
+        }
 
     }
 
@@ -224,6 +282,17 @@ import java.util.Arrays;
         public Action elbowDown1() {
             return new elbowDown1();
         }
+        public class elbowScoreSpecimen implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                elbow.setPosition(0.2);
+
+                return false;
+            }
+        }
+        public Action elbowScoreSpecimen() {
+            return new elbowScoreSpecimen();
+        }
     }
     public class Wrist {
         private Servo Wrist;
@@ -266,6 +335,17 @@ import java.util.Arrays;
         public Action elbowDown2() {
             return new elbowDown2();
         }
+        public class wristScoreSpecimen implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                Wrist.setPosition(0.2);
+
+                return false;
+            }
+        }
+        public Action wristScoreSpecimen() {
+            return new wristScoreSpecimen();
+        }
     }
 
     public class IntakeL {
@@ -288,8 +368,13 @@ import java.util.Arrays;
         }
 
         public class OUT1 implements Action {
+            private boolean initialized = false;
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+
+                    initialized = true;
+                }
                 left_CR.setPower(-1);
                 return false;
             }
@@ -297,7 +382,19 @@ import java.util.Arrays;
         public Action OUT1() {
             return new OUT1();
         }
+
+        public class STOP1 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                left_CR.setPower(0);
+                return false;
+            }
+        }
+        public Action STOP1() {
+            return new STOP1();
+        }
     }
+
     public class IntakeR {
         private CRServo right_CR;
 
@@ -318,14 +415,29 @@ import java.util.Arrays;
         }
 
         public class OUT2 implements Action {
+            private boolean initialized = false;
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
+                if (!initialized) {
+
+                    initialized = true;
+                }
                 right_CR.setPower(-1);
                 return false;
             }
         }
         public Action OUT2() {
             return new OUT2();
+        }
+        public class STOP2 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+                right_CR.setPower(0);
+                return false;
+            }
+        }
+        public Action STOP2() {
+            return new STOP2();
         }
     }
     public class TWIST {
@@ -365,8 +477,8 @@ import java.util.Arrays;
         public void runOpMode() {
             Pose2d initialPose = new Pose2d(10.0, -63, Math.toRadians(90));
             SparkFunOTOSDrive drive = new SparkFunOTOSDrive(hardwareMap, initialPose);
-            slide lift = new slide(hardwareMap);
-            PIVOT pivot = new PIVOT(hardwareMap);
+            LIFTC Slide = new LIFTC(hardwareMap);
+            PIVOTC pivot = new PIVOTC(hardwareMap);
             Elbow Elbow = new Elbow(hardwareMap);
             Wrist Wrist = new Wrist(hardwareMap);
             TWIST twist = new TWIST(hardwareMap);
@@ -381,38 +493,48 @@ import java.util.Arrays;
 
 
 
+
         // vision here that outputs position
 
         TrajectoryActionBuilder toChamber = drive.actionBuilder(initialPose)
-                .lineToY(-36)
+                .strafeTo(new Vector2d(10, -37.5))
                 .waitSeconds(.5);
-        Action toHP = toChamber.fresh()
 
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(25, -37, Math.toRadians(270)), Math.toRadians(0),medium)
+        TrajectoryActionBuilder toHP = toChamber.fresh()
+                .splineToLinearHeading(new Pose2d(25, -55, Math.toRadians(315)), Math.toRadians(45))
+                .waitSeconds(.5);
+
+        TrajectoryActionBuilder pickUp = toHP.fresh()
+                .strafeToConstantHeading(new Vector2d(30, -60))
+                .waitSeconds(.5);
+
+
+
+        TrajectoryActionBuilder score = pickUp.fresh()
+                .setTangent(45)
+                .splineToSplineHeading(new Pose2d(4, -44, Math.toRadians(90)), Math.toRadians(45))
+                .strafeTo(new Vector2d(4, -35.5))
+                .waitSeconds(.5);
+
+        TrajectoryActionBuilder PARK = score.fresh()
+                //changed from 38.5 to 40.5
+                .strafeTo(new Vector2d(4,-40.5))
+                .strafeTo(new Vector2d(38,-40.5))
+                .splineToConstantHeading(new Vector2d(38,-10), Math.toRadians(90))
                 .waitSeconds(.5)
                 .setTangent(0)
-                .splineToSplineHeading(new Pose2d(28, -15, Math.toRadians(270)), Math.toRadians(0))
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(30, -10, Math.toRadians(270)), Math.toRadians(0))
+                .lineToXConstantHeading(50)
                 .waitSeconds(.5)
-                .lineToY(-55)
-                .setTangent(0)
-                .splineToSplineHeading(new Pose2d(10, -34, Math.toRadians(90)), Math.toRadians(0))
-                /*
-                .strafeTo(new Vector2d(50, -15))
+                .lineToYConstantHeading(-55)
+                .strafeTo(new Vector2d(48, -15))
                 .strafeTo(new Vector2d(60, -12))
-                .strafeTo(new Vector2d(60, -55))
-                 */
-
-                .build();
+                .strafeTo(new Vector2d(60, -55));
 
         Action wait = toChamber.fresh()
-                .waitSeconds(1)
+                .waitSeconds(.5)
                 .build();
         // actions that need to happen on init; for instance, a claw tightening.
         //Actions.runBlocking(claw.closeClaw());
-
 
 
 
@@ -433,16 +555,24 @@ import java.util.Arrays;
 
         Actions.runBlocking(
                 new SequentialAction(
-                        new ParallelAction(lift.SlideExtend(-1500), pivot.PivotUp(-3700), Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                        new ParallelAction(Slide.dMoveSlide(-1500), pivot.dMovePivot(-3700), Elbow.elbowFWD1(), Wrist.elbowFWD2()),
+                        //Drive to chamber first time and Score
                         toChamber.build(),
-                        Elbow.elbowScore1(),
-                        Wrist.elbowScore2(),
-                        wait,
-                        lift.SlideUnExtend(),
-                        toHP,
-                        new ParallelAction(Elbow.elbowFWD1(), Wrist.elbowFWD2()),
-                        wait
-                )
+                        new ParallelAction( Elbow.elbowScoreSpecimen(), Wrist.wristScoreSpecimen(), twist.zeroFlip()),
+                       wait,
+                        Slide.dMoveSlide(-200),
+                        toHP.build(),
+                        //PickupPositions and Servo In
+                        new ParallelAction(Slide.dMoveSlide(-800), pivot.dMovePivot(-450), Elbow.elbowDown1(), Wrist.elbowDown2(), twist.ninetyDe()),
+
+                        new ParallelAction(pickUp.build(), left_CR.IN1(), right_CR.IN2()),
+                        new ParallelAction(Slide.dMoveSlide(-1700), pivot.dMovePivot(-3700), Elbow.elbowFWD1(), Wrist.elbowFWD2(), twist.zeroFlip(), right_CR.STOP2(), left_CR.STOP1()),
+                        score.build(),
+                        //Previous Path ends at HighChamber so this part scores
+                        new ParallelAction( Elbow.elbowScoreSpecimen(), Wrist.wristScoreSpecimen(), twist.zeroFlip()),
+                        //Park for 3 pts
+                        PARK.build()
+                        )
         );
     }
 }

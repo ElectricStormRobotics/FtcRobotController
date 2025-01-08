@@ -33,7 +33,7 @@ public class SparkFunOTOSDrive extends MecanumDrive {
         // firmware version 1.0, these values will be lost after a power cycle, so
         // you will need to set them each time you power up the sensor. For example, if
         // the sensor is mounted 5 inches to the left (negative X) and 10 inches
-        // forward (positive Y) of the center of the robot, and mounted 90 degrees
+        // forward (posit[[ive Y) of the center of the robot, and mounted 90 degrees
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
